@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.market.coupon.mapper.CouponThresholdMapper">
+
+    <resultMap type="com.market.coupon.model.CouponThreshold" id="baseMap">
+        <result property="id"    column="ID"    jdbcType="VARCHAR"/>
+        <result property="couponId"    column="COUPON_ID"    jdbcType="VARCHAR"/>
+        <result property="couponType"    column="COUPON_TYPE"    jdbcType="CHAR"/>
+        <result property="restrictionType"    column="RESTRICTION_TYPE"    jdbcType="CHAR"/>
+        <result property="fullSubCondition"    column="FULL_SUB_CONDITION"    jdbcType="INTEGER"/>
+        <result property="fullSubAmount"    column="FULL_SUB_AMOUNT"    jdbcType="INTEGER"/>
+        <result property="disAmount"    column="DIS_AMOUNT"    jdbcType="INTEGER"/>
+        <result property="fullRestriction"    column="FULL_RESTRICTION"    jdbcType="INTEGER"/>
+        <result property="saleNum"    column="SALE_NUM"    jdbcType="INTEGER"/>
+        <result property="upperLimitFlag"    column="UPPER_LIMIT_FLAG"    jdbcType="CHAR"/>
+        <result property="upperLimitAmount"    column="UPPER_LIMIT_AMOUNT"    jdbcType="INTEGER"/>
+        <result property="faceMoney"    column="MONEY"    jdbcType="INTEGER"/>
+        <result property="orderAmount"    column="ORDER_AMOUNT"    jdbcType="INTEGER"/>
+        <result property="payAmount"    column="PAY_AMOUNT"    jdbcType="INTEGER"/>
+        <result property="createBy"    column="CREATE_BY"    jdbcType="VARCHAR"/>
+        <result property="createTime"    column="CREATE_TIME"    jdbcType="DATE"/>
+        <result property="updateBy"    column="UPDATE_BY"    jdbcType="VARCHAR"/>
+        <result property="updateTime"    column="UPDATE_TIME"    jdbcType="DATE"/>
+        <result property="delFlag"    column="DEL_FLAG"    jdbcType="CHAR"/>
+        <result property="fullFixSubCondition"    column="FULL_FIX_SUB_CONDITION"    jdbcType="INTEGER"/>
+        <result property="disFixAmount"    column="DIS_FIX_AMOUNT"    jdbcType="INTEGER"/>
+    </resultMap>
+
+    <sql id="selectTCouponThresholdVo">
+        ID, COUPON_ID, COUPON_TYPE, RESTRICTION_TYPE, FULL_SUB_CONDITION,
+        FULL_SUB_AMOUNT, DIS_AMOUNT, FULL_RESTRICTION, SALE_NUM, UPPER_LIMIT_FLAG,
+        UPPER_LIMIT_AMOUNT, MONEY, ORDER_AMOUNT, PAY_AMOUNT, CREATE_BY, CREATE_TIME,
+        UPDATE_BY, UPDATE_TIME, DEL_FLAG, FULL_FIX_SUB_CONDITION,  DIS_FIX_AMOUNT
+    </sql>
+
+    <select id="selectTCouponThresholdList"  resultMap="baseMap">
+        select <include refid="selectTCouponThresholdVo"/> from T_COUPON_THRESHOLD
+        <where>
+            <if test="couponId != null  and couponId != ''"> and COUPON_ID = #{couponId}</if>
+            <if test="couponType != null  and couponType != ''"> and COUPON_TYPE = #{couponType}</if>
+            <if test="restrictionType != null  and restrictionType != ''"> and RESTRICTION_TYPE = #{restrictionType}</if>
+            <if test="fullSubCondition != null "> and FULL_SUB_CONDITION = #{fullSubCondition}</if>
+            <if test="fullSubAmount != null "> and FULL_SUB_AMOUNT = #{fullSubAmount}</if>
+            <if test="disAmount != null "> and DIS_AMOUNT = #{disAmount}</if>
+            <if test="fullRestriction != null "> and FULL_RESTRICTION = #{fullRestriction}</if>
+            <if test="saleNum != null "> and SALE_NUM = #{saleNum}</if>
+            <if test="upperLimitFlag != null  and upperLimitFlag != ''"> and UPPER_LIMIT_FLAG = #{upperLimitFlag}</if>
+            <if test="upperLimitAmount != null "> and UPPER_LIMIT_AMOUNT = #{upperLimitAmount}</if>
+            <if test="money != null "> and money = #{money}</if>
+            <if test="orderAmount != null "> and ORDER_AMOUNT = #{orderAmount}</if>
+            <if test="payAmount != null "> and PAY_AMOUNT = #{payAmount}</if>
+        </where>
+    </select>
+
+    <select id="getDataByCouponId" resultMap="baseMap">
+        select <include refid="selectTCouponThresholdVo"/> from T_COUPON_THRESHOLD
+        where DEL_FLAG = 0
+        <if test="couponId != null and couponId != ''">
+            and COUPON_ID = #{couponId,jdbcType=VARCHAR}
+        </if>
+        <if test="idList != null and idList.size() > 0">
+            and COUPON_ID in
+            <foreach collection="idList" item="item" open="(" close=")" separator=",">
+                #{item,jdbcType=VARCHAR}
+            </foreach>
+        </if>
+    </select>
+
+    <insert id="insertTCouponThreshold" >
+        insert into T_COUPON_THRESHOLD
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="couponId != null and couponId != ''">COUPON_ID,</if>
+            <if test="couponType != null and couponType != ''">COUPON_TYPE,</if>
+            <if test="restrictionType != null">RESTRICTION_TYPE,</if>
+            <if test="fullSubCondition != null">FULL_SUB_CONDITION,</if>
+            <if test="fullSubAmount != null">FULL_SUB_AMOUNT,</if>
+            <if test="disAmount != null">DIS_AMOUNT,</if>
+            <if test="fullRestriction != null">FULL_RESTRICTION,</if>
+            <if test="saleNum != null">SALE_NUM,</if>
+            <if test="upperLimitFlag != null">UPPER_LIMIT_FLAG,</if>
+            <if test="upperLimitAmount != null">UPPER_LIMIT_AMOUNT,</if>
+            <if test="money != null">money,</if>
+            <if test="orderAmount != null">ORDER_AMOUNT,</if>
+            <if test="payAmount != null">PAY_AMOUNT,</if>
+            <if test="createBy != null">CREATE_BY,</if>
+            <if test="createTime != null">CREATE_TIME,</if>
+            <if test="updateBy != null">UPDATE_BY,</if>
+            <if test="updateTime != null">UPDATE_TIME,</if>
+            <if test="delFlag != null">DEL_FLAG,</if>
+            <if test="fullFixSubCondition != null">FULL_FIX_SUB_CONDITION,</if>
+            <if test="disFixAmount != null">DIS_FIX_AMOUNT,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="couponId != null and couponId != ''">#{couponId},</if>
+            <if test="couponType != null and couponType != ''">#{couponType},</if>
+            <if test="restrictionType != null">#{restrictionType},</if>
+            <if test="fullSubCondition != null">#{fullSubCondition},</if>
+            <if test="fullSubAmount != null">#{fullSubAmount},</if>
+            <if test="disAmount != null">#{disAmount},</if>
+            <if test="fullRestriction != null">#{fullRestriction},</if>
+            <if test="saleNum != null">#{saleNum},</if>
+            <if test="upperLimitFlag != null">#{upperLimitFlag},</if>
+            <if test="upperLimitAmount != null">#{upperLimitAmount},</if>
+            <if test="money != null">#{money},</if>
+            <if test="orderAmount != null">#{orderAmount},</if>
+            <if test="payAmount != null">#{payAmount},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+            <if test="fullFixSubCondition != null">#{fullFixSubCondition},</if>
+            <if test="disFixAmount != null">#{disFixAmount},</if>
+         </trim>
+    </insert>
+
+    <update id="updateTCouponThreshold" >
+        update T_COUPON_THRESHOLD
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="couponId != null and couponId != ''">COUPON_ID = #{couponId},</if>
+            <if test="couponType != null and couponType != ''">COUPON_TYPE = #{couponType},</if>
+            <if test="restrictionType != null">RESTRICTION_TYPE = #{restrictionType},</if>
+            <if test="fullSubCondition != null">FULL_SUB_CONDITION = #{fullSubCondition},</if>
+            <if test="fullSubAmount != null">FULL_SUB_AMOUNT = #{fullSubAmount},</if>
+            <if test="disAmount != null">DIS_AMOUNT = #{disAmount},</if>
+            <if test="fullRestriction != null">FULL_RESTRICTION = #{fullRestriction},</if>
+            <if test="saleNum != null">SALE_NUM = #{saleNum},</if>
+            <if test="upperLimitFlag != null">UPPER_LIMIT_FLAG = #{upperLimitFlag},</if>
+            <if test="upperLimitAmount != null">UPPER_LIMIT_AMOUNT = #{upperLimitAmount},</if>
+            <if test="money != null">money = #{money},</if>
+            <if test="orderAmount != null">ORDER_AMOUNT = #{orderAmount},</if>
+            <if test="payAmount != null">PAY_AMOUNT = #{payAmount},</if>
+            <if test="createBy != null">CREATE_BY = #{createBy},</if>
+            <if test="createTime != null">CREATE_TIME = #{createTime},</if>
+            <if test="updateBy != null">UPDATE_BY = #{updateBy},</if>
+            <if test="updateTime != null">UPDATE_TIME = #{updateTime},</if>
+            <if test="delFlag != null">DEL_FLAG = #{delFlag},</if>
+            <if test="fullFixSubCondition != null">FULL_FIX_SUB_CONDITION = #{fullFixSubCondition},</if>
+            <if test="disFixAmount != null">DIS_FIX_AMOUNT = #{disFixAmount},</if>
+        </trim>
+        where DEL_FLAG = 0
+        <if test="id != null">
+            and id = #{id}
+        </if>
+        <if test="couponId != null and couponId != ''">
+            and COUPON_ID = #{couponId}
+        </if>
+    </update>
+
+    <delete id="deleteByCouponId" parameterType="String">
+        delete from T_COUPON_THRESHOLD where COUPON_ID = #{couponId}
+    </delete>
+
+    <insert id="batchInsertData" parameterType="java.util.List" useGeneratedKeys="false">
+        insert into T_COUPON_THRESHOLD(ID, COUPON_ID, COUPON_TYPE, RESTRICTION_TYPE,
+        FULL_SUB_CONDITION, FULL_SUB_AMOUNT, DIS_AMOUNT, FULL_RESTRICTION, SALE_NUM,
+        UPPER_LIMIT_FLAG, UPPER_LIMIT_AMOUNT, MONEY, ORDER_AMOUNT, PAY_AMOUNT, CREATE_BY,
+        CREATE_TIME, UPDATE_BY, UPDATE_TIME, DEL_FLAG, FULL_FIX_SUB_CONDITION, DIS_FIX_AMOUNT)
+        <foreach item="item" index="index" collection="list" separator=" union all ">
+            select
+            #{item.id,jdbcType=VARCHAR},
+            #{item.couponId,jdbcType=VARCHAR},
+            #{item.couponType,jdbcType=CHAR},
+            #{item.restrictionType,jdbcType=CHAR},
+            #{item.fullSubCondition,jdbcType=VARCHAR},
+            #{item.fullSubAmount,jdbcType=DECIMAL},
+            #{item.disAmount,jdbcType=DECIMAL},
+            #{item.fullRestriction,jdbcType=DECIMAL},
+            #{item.saleNum,jdbcType=DECIMAL},
+            #{item.upperLimitFlag,jdbcType=CHAR},
+            #{item.upperLimitAmount,jdbcType=DECIMAL},
+            #{item.faceMoney,jdbcType=DECIMAL},
+            #{item.orderAmount,jdbcType=DECIMAL},
+            #{item.payAmount,jdbcType=DECIMAL},
+            #{item.createBy,jdbcType=VARCHAR},
+            #{item.createTime,jdbcType=DATE},
+            #{item.updateBy,jdbcType=VARCHAR},
+            #{item.updateTime,jdbcType=DATE},
+            #{item.delFlag,jdbcType=CHAR},
+            #{item.fullFixSubCondition,jdbcType=DECIMAL},
+            #{item.disFixAmount,jdbcType=DECIMAL}
+            from dual
+        </foreach>
+    </insert>
+
+    <update id="updateByCouponId">
+        update T_COUPON_THRESHOLD set DEL_FLAG = 1, UPDATE_TIME = SYSDATE, UPDATE_BY = #{updateUser}
+        where COUPON_ID in
+        <foreach item="item" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <select id="getAppActivityCouponList" resultType="com.market.coupon.model.CouponThreshold">
+        SELECT
+            tci.ID as couponId,
+            tci.COUPON_TYPE as couponType,
+            tci.COUPON_NAME as couponName,
+            tci.USE_DESC as useDesc,
+            tci.CONDITION_DESC as conditionDesc,
+            tac.RECEIVE_TYPE as receiveType,
+            tac.EFFECT_TYPE as effectType,
+            tac.EFFECT_START_TIME as effectStartTime,
+            tac.EFFECT_END_TIME as effectEndTime,
+            tac.TAKE_DATE_NUM as takeDateNum,
+            tac.EFFECT_DATE_NUM as effectDateNum,
+            tac.SAME_ACTIVITY_FLAG as sameActivityFlag,
+            tac.DIFF_ACTIVITY_FLAG as diffActivityFlag,
+            tac.OUT_ACTIVITY_FLAG as outActivityFlag,
+            tct.RESTRICTION_TYPE,
+            tct.DIS_AMOUNT,
+            tct.FULL_FIX_SUB_CONDITION,
+            tct.DIS_FIX_AMOUNT,
+            tct.FULL_SUB_CONDITION,
+            tct.FULL_SUB_AMOUNT,
+            tct.FULL_RESTRICTION,
+            tct.SALE_NUM,
+            tct.UPPER_LIMIT_FLAG,
+            tct.UPPER_LIMIT_AMOUNT,
+            tct.MONEY,
+            tct.ORDER_AMOUNT,
+            tct.PAY_AMOUNT
+        FROM
+            T_ACTIVITY_INFO tai
+            LEFT JOIN T_ACTIVITY_COUPON tac ON tai.ID = tac.ACTIVITY_ID
+            AND tac.DEL_FLAG = 0
+            LEFT JOIN T_COUPON_INFO tci ON tci.ID = tac.COUPON_ID
+            AND tci.DEL_FLAG = 0
+            LEFT JOIN T_COUPON_THRESHOLD tct ON tct.COUPON_ID = tci.ID
+            AND tct.DEL_FLAG = 0
+        WHERE
+            tai.DEL_FLAG = 0 and tai.APPROVE_STATUS = '1' and tai.STATUS = '1'
+            AND tai.ID = #{id}
+    </select>
+</mapper>

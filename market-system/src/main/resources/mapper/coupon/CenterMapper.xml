@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.market.coupon.mapper.CenterMapper">
+
+    <resultMap type="com.market.coupon.model.UserCouponInfo" id="baseMap">
+        <result property="id"    column="ID"    />
+        <result property="userNo"    column="USER_NO"    />
+        <result property="couponId"    column="COUPON_ID"    />
+        <result property="status"    column="STATUS"    />
+        <result property="phoneNumber"    column="PHONENUMBER"    />
+        <result property="appAccount"    column="APP_ACCOUNT"    />
+        <result property="cardNumber"    column="CARD_NUMBER"    />
+        <result property="receiveTime"    column="RECEIVE_TIME"    />
+        <result property="deviceNo"    column="DEVICE_NO"    />
+        <result property="ipAddress"    column="IP_ADDRESS"    />
+        <result property="macAddress"    column="MAC_ADDRESS"    />
+        <result property="activityId"    column="ACTIVITY_ID"    />
+        <result property="writeOffCode"    column="WRITE_OFF_CODE"    />
+        <result property="linkUrl"    column="LINK_URL"    />
+    </resultMap>
+
+    <sql id="selectTCouponThresholdVo">
+        ID, USER_NO, COUPON_ID, STATUS, PHONENUMBER, APP_ACCOUNT, CARD_NUMBER,
+        RECEIVE_TIME, DEVICE_NO, IP_ADDRESS, MAC_ADDRESS, ACTIVITY_ID, WRITE_OFF_CODE,
+        LINK_URL
+    </sql>
+
+    <select id="getListData" resultType="com.market.coupon.model.UserCouponEntity">
+        SELECT
+            tci.COUPON_NAME as couponName,
+            tci.COUPON_CODE as couponCode,
+            tai.ACTIVITY_NAME as activityName,
+            tuc.APP_ACCOUNT as appAccount,
+            tuc.PHONENUMBER as phoneNumber,
+            tuc.RECEIVE_TIME as receiveTime,
+            tuc.WRITE_OFF_CODE as writeOffCode,
+            tuc.LINK_URL as linkUrl,
+            tuc.STATUS as status
+        FROM
+            T_USER_COUPON tuc
+            LEFT JOIN T_COUPON_INFO tci ON tuc.COUPON_ID = tci.ID
+            AND tci.DEL_FLAG = 0
+            LEFT JOIN T_ACTIVITY_INFO tai ON tai.ID = tuc.ACTIVITY_ID
+            AND tai.DEL_FLAG = 0
+        <where>
+            <if test="account != null and account != ''">
+                and (tuc.PHONENUMBER like concat(concat('%', #{account}), '%')
+                or tuc.APP_ACCOUNT like concat(concat('%', #{account}), '%'))
+            </if>
+            <if test="couponName != null and couponName != ''">
+                and tci.COUPON_NAME like concat(concat('%', #{couponName}), '%')
+            </if>
+            <if test="couponCode != null and couponCode != ''">
+                and tci.COUPON_CODE like concat(concat('%', #{couponCode}), '%')
+            </if>
+            <if test="status != null and status != ''">
+                and tuc.STATUS = #{status}
+            </if>
+            <if test="businessType != null and businessType != ''">
+                and tci.BUSINESS_TYPE = #{businessType}
+            </if>
+            <if test="couponType != null and couponType != ''">
+                and tci.COUPON_TYPE = #{couponType}
+            </if>
+        </where>
+        order by tuc.RECEIVE_TIME desc
+    </select>
+</mapper>

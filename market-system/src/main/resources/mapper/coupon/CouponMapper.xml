@@ -1,0 +1,530 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.market.coupon.mapper.CouponMapper">
+
+    <resultMap type="com.market.coupon.model.CouponInfo" id="baseMap">
+        <result property="id"    column="ID"    />
+        <result property="businessType"    column="BUSINESS_TYPE"    />
+        <result property="couponType"    column="COUPON_TYPE"    />
+        <result property="couponAdd"    column="COUPON_ADD"    />
+        <result property="couponName"    column="COUPON_NAME"    />
+        <result property="couponCode"    column="COUPON_CODE"    />
+        <result property="couponPhoto"    column="COUPON_PHOTO"    />
+        <result property="useDesc"    column="USE_DESC"    />
+        <result property="verChannel"    column="VER_CHANNEL"    />
+        <result property="payType"    column="PAY_TYPE"    />
+        <result property="createBy"    column="CREATE_BY"    />
+        <result property="createTime"    column="CREATE_TIME"    />
+        <result property="updateBy"    column="UPDATE_BY"    />
+        <result property="updateTime"    column="UPDATE_TIME"    />
+        <result property="delFlag"    column="DEL_FLAG"    />
+        <result property="sendType"    column="SEND_TYPE"    />
+        <result property="conditionDesc"    column="CONDITION_DESC"    />
+        <result property="personLimit"    column="PERSON_LIMIT"    />
+        <result property="dateLimit"    column="DATE_LIMIT"    />
+        <result property="machineLimit"    column="MACHINE_LIMIT"    />
+    </resultMap>
+
+    <sql id="all_column">
+        ID, BUSINESS_TYPE, COUPON_TYPE, COUPON_ADD, COUPON_NAME, COUPON_CODE, COUPON_PHOTO,
+        USE_DESC, VER_CHANNEL, PAY_TYPE, CREATE_BY, CREATE_TIME, UPDATE_BY, UPDATE_TIME, DEL_FLAG,
+        SEND_TYPE, CONDITION_DESC, PERSON_LIMIT, DATE_LIMIT, MACHINE_LIMIT
+    </sql>
+
+    <select id="selectCouponInfoList" resultMap="baseMap">
+        select <include refid="all_column"/> from T_COUPON_INFO
+        <where>
+            <if test="businessType != null  and businessType != ''"> and BUSINESS_TYPE = #{businessType}</if>
+            <if test="couponType != null  and couponType != ''"> and COUPON_TYPE = #{couponType}</if>
+            <if test="couponAdd != null  and couponAdd != ''"> and COUPON_ADD like concat(concat('%', #{couponAdd}), '%')</if>
+            <if test="couponName != null  and couponName != ''"> and COUPON_NAME like concat(concat('%', #{couponName}), '%')</if>
+            <if test="couponCode != null  and couponCode != ''"> and COUPON_CODE like concat(concat('%', #{couponCode}), '%')</if>
+            <if test="useDesc != null  and useDesc != ''"> and USE_DESC = #{useDesc}</if>
+            <if test="verChannel != null  and verChannel != ''"> and VER_CHANNEL = #{verChannel}</if>
+            <if test="payType != null  and payType != ''"> and PAY_TYPE = #{payType}</if>
+            <if test="delFlag != null  and delFlag != ''"> and DEL_FLAG = #{delFlag}</if>
+            and DEL_FLAG = 0
+        </where>
+        order by CREATE_TIME desc
+    </select>
+
+    <select id="selectCouponInfoById" parameterType="String" resultMap="baseMap">
+        select <include refid="all_column"/> from T_COUPON_INFO
+        where id = #{id}
+    </select>
+
+    <insert id="insertCouponInfo">
+        insert into T_COUPON_INFO
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="businessType != null">BUSINESS_TYPE,</if>
+            <if test="couponType != null and couponType != ''">COUPON_TYPE,</if>
+            <if test="couponAdd != null">COUPON_ADD,</if>
+            <if test="couponName != null">COUPON_NAME,</if>
+            <if test="couponCode != null">COUPON_CODE,</if>
+            <if test="couponPhoto != null">COUPON_PHOTO,</if>
+            <if test="useDesc != null and useDesc != ''">USE_DESC,</if>
+            <if test="verChannel != null and verChannel != ''">VER_CHANNEL,</if>
+            <if test="payType != null and payType != ''">PAY_TYPE,</if>
+            <if test="createBy != null">CREATE_BY,</if>
+            <if test="createTime != null">CREATE_TIME,</if>
+            <if test="updateBy != null">UPDATE_BY,</if>
+            <if test="updateTime != null">UPDATE_TIME,</if>
+            <if test="delFlag != null">DEL_FLAG,</if>
+            <if test="sendType != null">SEND_TYPE,</if>
+            <if test="conditionDesc != null">CONDITION_DESC,</if>
+            <if test="personLimit != null">PERSON_LIMIT,</if>
+            <if test="dateLimit != null">DATE_LIMIT,</if>
+            <if test="machineLimit != null">MACHINE_LIMIT,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="businessType != null">#{businessType},</if>
+            <if test="couponType != null and couponType != ''">#{couponType},</if>
+            <if test="couponAdd != null">#{couponAdd},</if>
+            <if test="couponName != null">#{couponName},</if>
+            <if test="couponCode != null">#{couponCode},</if>
+            <if test="couponPhoto != null">#{couponPhoto},</if>
+            <if test="useDesc != null and useDesc != ''">#{useDesc},</if>
+            <if test="verChannel != null and verChannel != ''">#{verChannel},</if>
+            <if test="payType != null and payType != ''">#{payType},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+            <if test="sendType != null">#{sendType},</if>
+            <if test="conditionDesc != null">#{conditionDesc},</if>
+            <if test="personLimit != null">#{personLimit},</if>
+            <if test="dateLimit != null">#{dateLimit},</if>
+            <if test="machineLimit != null">#{machineLimit},</if>
+         </trim>
+    </insert>
+
+    <update id="updateCouponInfo">
+        update T_COUPON_INFO
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="businessType != null">BUSINESS_TYPE = #{businessType},</if>
+            <if test="couponType != null and couponType != ''">COUPON_TYPE = #{couponType},</if>
+            <if test="couponAdd != null">COUPON_ADD = #{couponAdd},</if>
+            <if test="couponName != null">COUPON_NAME = #{couponName},</if>
+            <if test="couponCode != null">COUPON_CODE = #{couponCode},</if>
+            <if test="couponPhoto != null">COUPON_PHOTO = #{couponPhoto},</if>
+            <if test="useDesc != null and useDesc != ''">USE_DESC = #{useDesc},</if>
+            <if test="verChannel != null and verChannel != ''">VER_CHANNEL = #{verChannel},</if>
+            <if test="payType != null and payType != ''">PAY_TYPE = #{payType},</if>
+            <if test="updateBy != null">UPDATE_BY = #{updateBy},</if>
+            <if test="delFlag != null">DEL_FLAG = #{delFlag},</if>
+            <if test="sendType != null">SEND_TYPE = #{sendType},</if>
+            <if test="conditionDesc != null">CONDITION_DESC = #{conditionDesc},</if>
+            <if test="personLimit != null">PERSON_LIMIT = #{personLimit},</if>
+            <if test="dateLimit != null">DATE_LIMIT = #{dateLimit},</if>
+            <if test="machineLimit != null">MACHINE_LIMIT = #{machineLimit},</if>
+            UPDATE_TIME = SYSDATE
+        </trim>
+        where ID = #{id}
+    </update>
+
+    <delete id="deleteCouponInfoByIds">
+        update T_COUPON_INFO set DEL_FLAG = 1, UPDATE_TIME = SYSDATE, UPDATE_BY = #{updateUser}
+        where ID in
+        <foreach item="id" collection="list" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="selectActivityCouponList" resultType="com.market.coupon.model.ActivityCoupon">
+        select
+        tci.ID AS couponId,
+        tac.ACTIVITY_ID as activityId,
+        tac.INVENTORY_NUM as inventoryNum,
+        tac.EFFECT_TYPE as effectType,
+        tac.EFFECT_TIME as effectTime,
+        tac.TAKE_DATE_NUM as takeDateNum,
+        tac.EFFECT_DATE_NUM as effectDateNum,
+        (select count(*) from T_USER_COUPON where COUPON_ID in
+        <foreach collection="list" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>) as receiveNum
+        from T_COUPON_INFO tci
+        left join T_ACTIVITY_COUPON tac on tci.ID = tac.COUPON_ID and tac.DEL_FLAG = 0
+        left join T_ACTIVITY_INFO tai on tai.ID = tac.ACTIVITY_ID and tai.DEL_FLAG = 0
+        where tci.DEL_FLAG = 0
+        <if test="list != null and list.size() > 0">
+            and tci.ID in
+            <foreach collection="list" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="selectInfoList" resultType="com.market.coupon.model.ActivityCouponEntity">
+        SELECT
+            b.id,
+            b.couponName,
+            b.couponCode,
+            b.couponPhoto,
+            b.couponType,
+            b.contactNum,
+            b.createTime
+        FROM
+            (
+            SELECT
+                a.ID AS id,
+                a.COUPON_NAME AS couponName,
+                a.COUPON_CODE AS couponCode,
+                a.COUPON_PHOTO AS couponPhoto,
+                a.COUPON_TYPE AS couponType,
+                COUNT( a.ACTIVITY_ID ) AS contactNum,
+                a.CREATE_TIME AS createTime
+            FROM
+                (
+                SELECT
+                    tci.ID,
+                    tci.COUPON_NAME,
+                    tci.COUPON_CODE,
+                    to_char( tci.COUPON_PHOTO ) AS COUPON_PHOTO,
+                    tci.COUPON_TYPE,
+                    tai.ID AS ACTIVITY_ID,
+                    tci.CREATE_TIME
+                FROM
+                    T_COUPON_INFO tci
+                    LEFT JOIN T_ACTIVITY_COUPON tac ON tci.ID = tac.COUPON_ID
+                    AND tac.DEL_FLAG = 0
+                    LEFT JOIN T_ACTIVITY_INFO tai ON tai.ID = tac.ACTIVITY_ID
+                    AND tai.DEL_FLAG = 0
+                WHERE
+                    tci.DEL_FLAG = 0
+                    <if test="businessType != null  and businessType != ''"> and tci.BUSINESS_TYPE = #{businessType}</if>
+                    <if test="couponType != null  and couponType != ''"> and tci.COUPON_TYPE = #{couponType}</if>
+                    <if test="couponName != null  and couponName != ''"> and tci.COUPON_NAME like concat(concat('%', #{couponName}), '%')</if>
+                    <if test="couponCode != null  and couponCode != ''"> and tci.COUPON_CODE like concat(concat('%', #{couponCode}), '%')</if>
+                    <if test="params.beginTime != null and params.beginTime != ''">
+                        and to_char(tci.CREATE_TIME,'yyyy-mm-dd') &gt;= #{params.beginTime}
+                    </if>
+                    <if test="params.endTime != null and params.endTime != ''">
+                        and to_char(tci.CREATE_TIME,'yyyy-mm-dd') &lt;= #{params.endTime}
+                    </if>
+                ) a
+            GROUP BY
+                a.ID,
+                a.COUPON_NAME,
+                a.COUPON_CODE,
+                a.COUPON_PHOTO,
+                a.COUPON_TYPE,
+                a.CREATE_TIME
+            ) b
+        ORDER BY
+            b.createTime DESC
+    </select>
+
+    <select id="getListData" resultMap="baseMap">
+        select <include refid="all_column"/> from T_COUPON_INFO
+        where DEL_FLAG = 0
+        <if test="list != null and list.size() > 0">
+            and ID in
+            <foreach collection="list" item="item" separator="," open="(" close=")">
+                #{item}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="getReceiveList" resultType="com.market.coupon.model.UserCouponInfo">
+        SELECT
+            COUPON_ID AS couponId,
+            count( * ) AS receiveNum
+        FROM
+            T_USER_COUPON
+        WHERE
+            COUPON_ID in
+            <foreach collection="list" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        GROUP BY
+            COUPON_ID
+    </select>
+
+    <select id="getActivityCouponList" resultType="com.market.coupon.model.ActivityCoupon">
+        select COUPON_ID AS couponId, INVENTORY_NUM as inventoryNum
+        from T_ACTIVITY_COUPON
+        where DEL_FLAG = 0 and COUPON_ID in
+        <foreach collection="list" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="getReceiveDataList" resultType="com.market.coupon.model.UserCouponInfo">
+        select ID, USER_NO, COUPON_ID, STATUS, PHONENUMBER, APP_ACCOUNT, CARD_NUMBER,
+        RECEIVE_TIME, DEVICE_NO, IP_ADDRESS, MAC_ADDRESS, ACTIVITY_ID, WRITE_OFF_CODE,
+        LINK_URL, SEND_TYPE
+        from T_USER_COUPON
+        <where>
+            <if test="activityId != null and activityId != ''">
+                and ACTIVITY_ID = #{activityId}
+            </if>
+            <if test="couponId != null and couponId != ''">
+                and COUPON_ID = #{couponId}
+            </if>
+        </where>
+    </select>
+
+    <select id="getReceiveNum" resultType="int">
+        select count(*) from T_USER_COUPON where 1=1
+        <if test="beginTime != null and beginTime != '' and endTime != null and endTime != ''">
+            and to_char(RECEIVE_TIME,'yyyy-mm-dd hh24:mi:ss') &gt;= #{beginTime}
+            and to_char(RECEIVE_TIME,'yyyy-mm-dd hh24:mi:ss') &lt;= #{endTime}
+        </if>
+    </select>
+
+    <select id="getUseNum" resultType="int">
+        select count(*) from T_USER_COUPON where STATUS = '2'
+        <if test="beginTime != null and beginTime != '' and endTime != null and endTime != ''">
+            and to_char(RECEIVE_TIME,'yyyy-mm-dd hh24:mi:ss') &gt;= #{beginTime}
+            and to_char(RECEIVE_TIME,'yyyy-mm-dd hh24:mi:ss') &lt;= #{endTime}
+        </if>
+    </select>
+
+    <select id="getSummaryListData" resultType="com.market.index.model.SummaryInfo">
+        SELECT
+            tci.ID AS couponId,
+            tci.COUPON_NAME AS couponName,
+            tci.COUPON_CODE AS couponCode,
+            tai.ACTIVITY_NAME AS activityName,
+            tai.BUDGET AS budget,
+            NVL( sum( tgi.GRANT_NUM ), 0 ) AS sendCouponNum,
+            count( tuc.USER_NO ) AS receiveCouponNum
+        FROM
+            T_COUPON_INFO tci
+            LEFT JOIN T_ACTIVITY_COUPON tac ON tci.ID = tac.COUPON_ID
+            AND tac.DEL_FLAG = 0
+            LEFT JOIN T_ACTIVITY_INFO tai ON tai.ID = tac.ACTIVITY_ID
+            AND tai.DEL_FLAG = 0
+            LEFT JOIN T_GRANT_INFO tgi ON tgi.COUPON_ID = tci.ID
+            LEFT JOIN T_USER_COUPON tuc ON tuc.COUPON_ID = tci.ID
+        where tci.DEL_FLAG = 0
+        <if test="activityName != null and activityName != ''">
+            and tai.ACTIVITY_NAME like concat(concat('%', #{activityName}), '%')
+        </if>
+        <if test="couponName != null and couponName != ''">
+            and tci.COUPON_NAME like concat(concat('%', #{couponName}), '%')
+        </if>
+        <if test="couponCode != null and couponCode != ''">
+            and tci.COUPON_CODE like concat(concat('%', #{couponCode}), '%')
+        </if>
+        <if test="params.beginTime != null and params.beginTime != '' and params.endTime != null and params.endTime != ''">
+            and ((to_char(tai.START_TIME,'yyyy-mm-dd hh24:mi:ss') &gt;= #{params.beginTime}
+            and to_char(tai.START_TIME,'yyyy-mm-dd hh24:mi:ss') &lt;= #{params.endTime})
+            or (to_char(tai.START_TIME,'yyyy-mm-dd hh24:mi:ss') &lt;= #{params.beginTime}
+            and to_char(tai.END_TIME,'yyyy-mm-dd hh24:mi:ss') &gt;= #{params.endTime})
+            or (to_char(tai.END_TIME,'yyyy-mm-dd hh24:mi:ss') &gt;= #{params.beginTime}
+            and to_char(tai.END_TIME,'yyyy-mm-dd hh24:mi:ss') &lt;= #{params.endTime}))
+        </if>
+        GROUP BY
+            tci.ID,
+            tci.COUPON_NAME,
+            tci.COUPON_CODE,
+            tai.ACTIVITY_NAME,
+            tai.BUDGET
+    </select>
+
+    <select id="getUseNumByCouponIds" resultType="com.market.index.model.SummaryInfo">
+        select
+        count( * ) as useNum,
+        COUPON_ID as couponId
+        from T_USER_COUPON where STATUS = '2'
+        <if test="idList != null and idList.size() > 0">
+            and COUPON_ID in
+            <foreach collection="idList" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+        GROUP BY
+        COUPON_ID
+    </select>
+
+    <select id="getActivityNum" resultType="int">
+        SELECT
+            count(tai.ID)
+        FROM
+            T_COUPON_INFO tci
+            LEFT JOIN T_ACTIVITY_COUPON tac ON tci.ID = tac.COUPON_ID
+            AND tac.DEL_FLAG = 0
+            LEFT JOIN T_ACTIVITY_INFO tai ON tai.ID = tac.ACTIVITY_ID
+            AND tai.DEL_FLAG = 0
+        WHERE
+            tci.DEL_FLAG = 0
+            and tci.ID = #{id}
+    </select>
+
+    <select id="getPersonReceiveNum" resultType="int">
+        SELECT
+            count( * )
+        FROM
+            T_USER_COUPON
+        <where>
+            <if test="couponId != null and couponId != ''">
+                and COUPON_ID = #{couponId}
+            </if>
+            <if test="phoneNumber != null and phoneNumber != ''">
+                and PHONENUMBER = #{phoneNumber}
+            </if>
+            <if test="deviceNo != null and deviceNo != ''">
+                and DEVICE_NO = #{deviceNo}
+            </if>
+            <if test="receiveTime != null and receiveTime != ''">
+                and to_char(RECEIVE_TIME,'yyyy-mm-dd') = #{receiveTime}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertCouponUser">
+        insert into T_USER_COUPON
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">ID,</if>
+            <if test="userNo != null">USER_NO,</if>
+            <if test="couponId != null and couponId != ''">COUPON_ID,</if>
+            <if test="status != null">STATUS,</if>
+            <if test="phoneNumber != null">PHONENUMBER,</if>
+            <if test="appAccount != null">APP_ACCOUNT,</if>
+            <if test="cardNumber != null">CARD_NUMBER,</if>
+            <if test="receiveTime != null">RECEIVE_TIME,</if>
+            <if test="deviceNo != null and deviceNo != ''">DEVICE_NO,</if>
+            <if test="ipAddress != null and ipAddress != ''">IP_ADDRESS,</if>
+            <if test="macAddress != null">MAC_ADDRESS,</if>
+            <if test="activityId != null">ACTIVITY_ID,</if>
+            <if test="writeOffCode != null">WRITE_OFF_CODE,</if>
+            <if test="linkUrl != null">LINK_URL,</if>
+            <if test="sendType != null">SEND_TYPE,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="userNo != null">#{userNo},</if>
+            <if test="couponId != null and couponId != ''">#{couponId},</if>
+            <if test="status != null">#{status},</if>
+            <if test="phoneNumber != null">#{phoneNumber},</if>
+            <if test="appAccount != null">#{appAccount},</if>
+            <if test="cardNumber != null">#{cardNumber},</if>
+            <if test="receiveTime != null">#{receiveTime},</if>
+            <if test="deviceNo != null and deviceNo != ''">#{deviceNo},</if>
+            <if test="ipAddress != null and ipAddress != ''">#{ipAddress},</if>
+            <if test="macAddress != null">#{macAddress},</if>
+            <if test="activityId != null">#{activityId},</if>
+            <if test="writeOffCode != null">#{writeOffCode},</if>
+            <if test="linkUrl != null">#{linkUrl},</if>
+            <if test="sendType != null">#{sendType},</if>
+        </trim>
+    </insert>
+
+    <select id="getUserCouponList" resultType="com.market.coupon.model.CouponThreshold">
+        SELECT
+            tci.ID as couponId,
+            tai.ID as activityId,
+            tci.COUPON_NAME as couponName,
+            tci.COUPON_TYPE as couponType,
+            tai.ACTIVITY_NAME as activityName,
+            tuc.RECEIVE_TIME as receiveTime,
+            tuc.STATUS as status,
+            tuc.USE_TIME as useTime,
+            tac.RECEIVE_TYPE AS receiveType,
+            tac.EFFECT_TYPE AS effectType,
+            tac.EFFECT_START_TIME AS effectStartTime,
+            tac.EFFECT_END_TIME AS effectEndTime,
+            tac.TAKE_DATE_NUM AS takeDateNum,
+            tac.EFFECT_DATE_NUM AS effectDateNum,
+            tac.SAME_ACTIVITY_FLAG AS sameActivityFlag,
+            tac.DIFF_ACTIVITY_FLAG AS diffActivityFlag,
+            tac.OUT_ACTIVITY_FLAG AS outActivityFlag,
+            tct.RESTRICTION_TYPE,
+            tct.DIS_AMOUNT,
+            tct.FULL_FIX_SUB_CONDITION,
+            tct.DIS_FIX_AMOUNT,
+            tct.FULL_SUB_CONDITION,
+            tct.FULL_SUB_AMOUNT,
+            tct.FULL_RESTRICTION,
+            tct.SALE_NUM,
+            tct.UPPER_LIMIT_FLAG,
+            tct.UPPER_LIMIT_AMOUNT,
+            tct.MONEY,
+            tct.ORDER_AMOUNT,
+            tct.PAY_AMOUNT
+        FROM
+            T_USER_COUPON tuc
+            LEFT JOIN T_COUPON_INFO tci ON tuc.COUPON_ID = tci.ID
+            AND tci.DEL_FLAG = '0'
+            LEFT JOIN T_ACTIVITY_INFO tai ON tai.ID = tuc.ACTIVITY_ID
+            AND tai.DEL_FLAG = '0'
+            LEFT JOIN T_ACTIVITY_COUPON tac ON tac.COUPON_ID = tuc.COUPON_ID
+            AND tac.ACTIVITY_ID = tai.ID
+            AND tac.DEL_FLAG = '0'
+            LEFT JOIN T_COUPON_THRESHOLD tct ON tct.COUPON_ID = tuc.COUPON_ID
+            AND tct.DEL_FLAG = '0'
+        <where>
+            <if test="couponId != null and couponId != ''">
+                and tuc.COUPON_ID = #{couponId}
+            </if>
+            <if test="userNo != null and userNo != ''">
+                and tuc.USER_NO = #{userNo}
+            </if>
+            <if test="phoneNumber != null and phoneNumber != ''">
+                and tuc.PHONENUMBER = #{phoneNumber}
+            </if>
+            <if test="appAccount != null and appAccount != ''">
+                and tuc.APP_ACCOUNT = #{appAccount}
+            </if>
+            <if test="cardNumber != null and cardNumber != ''">
+                and tuc.CARD_NUMBER = #{cardNumber}
+            </if>
+        </where>
+        ORDER BY tuc.RECEIVE_TIME desc
+    </select>
+
+    <select id="getUserCouponData" resultType="com.market.coupon.model.UserCouponInfo">
+        select ID, USER_NO, COUPON_ID, STATUS, PHONENUMBER, APP_ACCOUNT, CARD_NUMBER,
+        RECEIVE_TIME, DEVICE_NO, IP_ADDRESS, MAC_ADDRESS, ACTIVITY_ID, WRITE_OFF_CODE,
+        LINK_URL, SEND_TYPE, USE_TIME
+        from T_USER_COUPON
+        <where>
+            <if test="activityId != null and activityId != ''">
+                and ACTIVITY_ID = #{activityId}
+            </if>
+            <if test="couponId != null and couponId != ''">
+                and COUPON_ID = #{couponId}
+            </if>
+            <if test="phoneNumber != null and phoneNumber != ''">
+                and PHONENUMBER = #{phoneNumber}
+            </if>
+            <if test="userNo != null and userNo != ''">
+                and USER_NO = #{userNo}
+            </if>
+            <if test="cardNumber != null and cardNumber != ''">
+                and CARD_NUMBER = #{cardNumber}
+            </if>
+        </where>
+    </select>
+
+    <update id="updateUserCoupon">
+        update T_USER_COUPON set STATUS = #{status}, USE_TIME = #{useTime}
+        <where>
+            <if test="id != null and id != ''">
+                and ID = #{id}
+            </if>
+            <if test="activityId != null and activityId != ''">
+                and ACTIVITY_ID = #{activityId}
+            </if>
+            <if test="couponId != null and couponId != ''">
+                and COUPON_ID = #{couponId}
+            </if>
+            <if test="phoneNumber != null and phoneNumber != ''">
+                and PHONENUMBER = #{phoneNumber}
+            </if>
+            <if test="userNo != null and userNo != ''">
+                and USER_NO = #{userNo}
+            </if>
+            <if test="cardNumber != null and cardNumber != ''">
+                and CARD_NUMBER = #{cardNumber}
+            </if>
+        </where>
+    </update>
+</mapper>

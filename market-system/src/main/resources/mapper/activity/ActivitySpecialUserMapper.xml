@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.market.activity.mapper.ActivitySpecialUserMapper">
+
+    <resultMap type="com.market.activity.model.CardInfo" id="baseMap">
+        <result property="id"    column="ID"    />
+        <result property="activityId"    column="ACTIVITY_ID"    />
+        <result property="cardNo"    column="CARD_NO"    />
+        <result property="cardName"    column="CARD_NAME"    />
+        <result property="appUserId"    column="APP_USER_ID"    />
+        <result property="appAccount"    column="APP_ACCOUNT"    />
+        <result property="companyUserName"    column="COMPANY_USER_NAME"    />
+        <result property="cardFaceName"    column="CARD_SURFACE_NAME"    />
+        <result property="createBy"    column="CREATE_BY"    />
+        <result property="createTime"    column="CREATE_TIME"    />
+        <result property="updateBy"    column="UPDATE_BY"    />
+        <result property="updateTime"    column="UPDATE_TIME"    />
+        <result property="delFlag"    column="DEL_FLAG"    />
+    </resultMap>
+
+    <sql id="all_column">
+        ID, ACTIVITY_ID, CARD_NO, CARD_NAME, APP_USER_ID,
+        APP_ACCOUNT, COMPANY_USER_NAME, CARD_SURFACE_NAME,
+        CREATE_BY, CREATE_TIME, UPDATE_BY, UPDATE_TIME, DEL_FLAG
+    </sql>
+
+    <insert id="insertData" parameterType="java.util.List" useGeneratedKeys="false">
+        insert into T_ACTIVITY_SPECIAL_USER(ID, ACTIVITY_ID, CARD_NO, CARD_NAME, APP_USER_ID,
+        APP_ACCOUNT, COMPANY_USER_NAME, CARD_SURFACE_NAME,
+        CREATE_BY, CREATE_TIME, UPDATE_BY, UPDATE_TIME, DEL_FLAG)
+        <foreach item="item" index="index" collection="list" separator=" union all ">
+            select
+            #{item.id,jdbcType=VARCHAR},
+            #{item.activityId,jdbcType=VARCHAR},
+            #{item.cardNo,jdbcType=VARCHAR},
+            #{item.cardName,jdbcType=VARCHAR},
+            #{item.appUserId,jdbcType=VARCHAR},
+            #{item.appAccount,jdbcType=VARCHAR},
+            #{item.companyUserName,jdbcType=VARCHAR},
+            #{item.cardFaceName,jdbcType=VARCHAR},
+            #{item.createBy,jdbcType=VARCHAR},
+            #{item.createTime,jdbcType=DATE},
+            #{item.updateBy,jdbcType=VARCHAR},
+            #{item.updateTime,jdbcType=DATE},
+            #{item.delFlag,jdbcType=CHAR}
+            from dual
+        </foreach>
+    </insert>
+
+    <select id="getSpecialData" resultType="int">
+        select count(*) from T_ACTIVITY_SPECIAL_USER where DEL_FLAG = 0
+        <if test="activityId != null and activityId != ''">
+            and ACTIVITY_ID = #{activityId}
+        </if>
+        <if test="appAccount != null and appAccount != ''">
+            and APP_ACCOUNT = #{appAccount}
+        </if>
+        <if test="cardNumber != null and cardNumber != ''">
+            and CARD_NO = #{cardNumber}
+        </if>
+    </select>
+</mapper>

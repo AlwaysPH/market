@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.market.activity.mapper.GrantMapper">
+
+    <resultMap type="com.market.activity.model.GrantInfo" id="baseMap">
+        <result property="id"    column="ID"    />
+        <result property="activityId"    column="ACTIVITY_ID"    />
+        <result property="couponId"    column="COUPON_ID"    />
+        <result property="grantNum"    column="GRANT_NUM"    />
+        <result property="createBy"    column="CREATE_BY"    />
+        <result property="createTime"    column="CREATE_TIME"    />
+        <result property="updateBy"    column="UPDATE_BY"    />
+        <result property="updateTime"    column="UPDATE_TIME"    />
+    </resultMap>
+
+    <sql id="all_column">
+        ID, ACTIVITY_ID, COUPON_ID, GRANT_NUM, CREATE_BY, CREATE_TIME
+    </sql>
+
+    <insert id="insert">
+        insert into T_GRANT_INFO(ID, ACTIVITY_ID, COUPON_ID, GRANT_NUM, CREATE_BY, CREATE_TIME)
+        values (#{id}, #{activityId}, #{couponId}, #{grantNum}, #{createBy}, #{createTime})
+    </insert>
+
+    <select id="getDataList" resultMap="baseMap">
+        select COUPON_ID, sum(GRANT_NUM) as GRANT_NUM from T_GRANT_INFO
+        <where>
+            <if test="activityId != null and activityId != ''">
+                and ACTIVITY_ID = #{activityId}
+            </if>
+            <if test="couponId != null and couponId != ''">
+                and COUPON_ID = #{couponId}
+            </if>
+        </where>
+        group by COUPON_ID
+    </select>
+
+    <select id="getSendNum" resultType="int">
+        select nvl(sum(GRANT_NUM), 0) from T_GRANT_INFO where 1=1
+        <if test="beginTime != null and beginTime != '' and endTime != null and endTime != ''">
+            and to_char(CREATE_TIME,'yyyy-mm-dd hh24:mi:ss') &gt;= #{beginTime}
+            and to_char(CREATE_TIME,'yyyy-mm-dd hh24:mi:ss') &lt;= #{endTime}
+        </if>
+    </select>
+</mapper>

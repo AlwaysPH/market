@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.market.activity.mapper.ActivityMapper">
+
+    <resultMap type="com.market.activity.model.ActivityInfo" id="baseMap">
+        <result property="id"    column="ID"    />
+        <result property="activityAbb"    column="ACTIVITY_ABB"    />
+        <result property="activityName"    column="ACTIVITY_NAME"    />
+        <result property="startTime"    column="START_TIME"    />
+        <result property="endTime"    column="END_TIME"    />
+        <result property="approveStatus"    column="APPROVE_STATUS"    />
+        <result property="budget"    column="BUDGET"    />
+        <result property="xiaoxiangPayNum"    column="XIAOXIANG_PAY_NUM"    />
+        <result property="orgName"    column="ORG_NAME"    />
+        <result property="orgPayNum"    column="ORG_PAY_NUM"    />
+        <result property="merchantPayNum"    column="MERCHANT_PAY_NUM"    />
+        <result property="alarmNum"    column="ALARM_NUM"    />
+        <result property="alarmContent"    column="ALARM_CONTENT"    />
+        <result property="alarmPhone"    column="ALARM_PHONE"    />
+        <result property="alarmEmail"    column="ALARM_EMAIL"    />
+        <result property="payMethod"    column="PAY_METHOD"    />
+        <result property="effectTime"    column="EFFECT_TIME"    />
+        <result property="limitNum"    column="LIMIT_NUM"    />
+        <result property="useRule"    column="USE_RULE"    />
+        <result property="contractPhoto"    column="CONTRACT_PHOTO"    />
+        <result property="shareFlag"    column="SHARE_FLAG"    />
+        <result property="shareTitle"    column="SHARE_TITLE"    />
+        <result property="shareContent"    column="SHARE_CONTENT"    />
+        <result property="sharePhoto"    column="SHARE_PHOTO"    />
+        <result property="detailPhoto"    column="DETAIL_PHOTO"    />
+        <result property="createBy"    column="CREATE_BY"    />
+        <result property="createTime"    column="CREATE_TIME"    />
+        <result property="updateBy"    column="UPDATE_BY"    />
+        <result property="updateTime"    column="UPDATE_TIME"    />
+        <result property="delFlag"    column="DEL_FLAG"    />
+        <result property="status"    column="STATUS"    />
+        <result property="auditRemark"    column="AUDIT_REMARK"    />
+        <result property="auditTime"    column="AUDIT_TIME"    />
+        <result property="regionName"    column="RANGE_NAME"    />
+        <result property="regionCode"    column="RANGE_CODE"    />
+        <result property="operationType"    column="OPERATION_TYPE"    />
+    </resultMap>
+
+    <sql id="all_column">
+        ID, ACTIVITY_ABB, ACTIVITY_NAME, START_TIME, END_TIME, APPROVE_STATUS, BUDGET,
+        XIAOXIANG_PAY_NUM, ORG_NAME, ORG_PAY_NUM, MERCHANT_PAY_NUM, ALARM_NUM, ALARM_CONTENT,
+        ALARM_PHONE, ALARM_EMAIL, PAY_METHOD, EFFECT_TIME, LIMIT_NUM, USE_RULE, CONTRACT_PHOTO,
+        SHARE_FLAG, SHARE_TITLE, SHARE_CONTENT, SHARE_PHOTO, DETAIL_PHOTO, CREATE_BY, CREATE_TIME, UPDATE_BY,
+        UPDATE_TIME, DEL_FLAG, STATUS, AUDIT_REMARK, AUDIT_TIME, RANGE_NAME, RANGE_CODE, OPERATION_TYPE
+    </sql>
+
+    <select id="selectActivityInfoList" resultMap="baseMap">
+        SELECT
+        tai.ID,
+        tai.ACTIVITY_ABB,
+        tai.ACTIVITY_NAME,
+        tai.START_TIME,
+        tai.END_TIME,
+        tai.APPROVE_STATUS,
+        tai.BUDGET,
+        tai.XIAOXIANG_PAY_NUM,
+        tai.ORG_NAME,
+        tai.ORG_PAY_NUM,
+        tai.MERCHANT_PAY_NUM,
+        tai.ALARM_NUM,
+        tai.ALARM_CONTENT,
+        tai.ALARM_PHONE,
+        tai.ALARM_EMAIL,
+        tai.PAY_METHOD,
+        tai.EFFECT_TIME,
+        tai.LIMIT_NUM,
+        tai.USE_RULE,
+        tai.CONTRACT_PHOTO,
+        tai.SHARE_FLAG,
+        tai.SHARE_TITLE,
+        tai.SHARE_CONTENT,
+        tai.SHARE_PHOTO,
+        tai.DETAIL_PHOTO,
+        tai.CREATE_BY,
+        tai.CREATE_TIME,
+        tai.UPDATE_BY,
+        tai.UPDATE_TIME,
+        tai.DEL_FLAG,
+        tai.STATUS,
+        tai.AUDIT_REMARK,
+        tai.AUDIT_TIME,
+        tai.RANGE_NAME,
+        tai.RANGE_CODE,
+        tai.OPERATION_TYPE,
+        su.USER_NAME as updateName
+        FROM
+        T_ACTIVITY_INFO tai LEFT JOIN SYS_USER su on tai.UPDATE_BY = su.USER_ID
+        and su.DEL_FLAG = 0
+        <where>
+            <if test="activityAbb != null  and activityAbb != ''"> and tai.ACTIVITY_ABB like concat(concat('%', #{activityAbb}), '%')</if>
+            <if test="activityName != null  and activityName != ''"> and tai.ACTIVITY_NAME like concat(concat('%', #{activityName}), '%')</if>
+            <if test="startTime != null and startTime != '' and endTime != null and endTime != ''">
+                and ((to_char(tai.START_TIME,'yyyy-mm-dd hh24:mi:ss') &gt;= #{startTime}
+                    and to_char(tai.START_TIME,'yyyy-mm-dd hh24:mi:ss') &lt;= #{endTime})
+                    or (to_char(tai.START_TIME,'yyyy-mm-dd hh24:mi:ss') &lt;= #{startTime}
+                    and to_char(tai.END_TIME,'yyyy-mm-dd hh24:mi:ss') &gt;= #{endTime})
+                    or (to_char(tai.END_TIME,'yyyy-mm-dd hh24:mi:ss') &gt;= #{startTime}
+                    and to_char(tai.END_TIME,'yyyy-mm-dd hh24:mi:ss') &lt;= #{startTime}))
+            </if>
+            <if test="approveStatus != null  and approveStatus != ''"> and tai.APPROVE_STATUS = #{approveStatus}</if>
+            <if test="status != null  and status != ''"> and tai.STATUS = #{status}</if>
+            <if test="operationType != null  and operationType != ''"> and tai.OPERATION_TYPE = #{operationType}</if>
+            <if test="updateName != null  and updateName != ''"> and su.USER_NAME like concat(concat('%', #{updateName}), '%')</if>
+            <if test="params.beginTime != null and params.beginTime != ''">
+                and to_char(tai.CREATE_TIME,'yyyy-mm-dd') &gt;= #{params.beginTime}
+            </if>
+            <if test="params.endTime != null and params.endTime != ''">
+                and to_char(tai.CREATE_TIME,'yyyy-mm-dd') &lt;= #{params.endTime}
+            </if>
+            and tai.DEL_FLAG = 0
+        </where>
+        order by tai.CREATE_TIME desc
+    </select>
+
+    <select id="selectActivityInfoById" parameterType="String" resultMap="baseMap">
+        select <include refid="all_column"/> from T_ACTIVITY_INFO
+        where ID = #{id} and DEL_FLAG = 0
+    </select>
+
+    <insert id="insertActivityInfo">
+        insert into T_ACTIVITY_INFO
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">ID,</if>
+            <if test="activityAbb != null">ACTIVITY_ABB,</if>
+            <if test="activityName != null">ACTIVITY_NAME,</if>
+            <if test="startTime != null">START_TIME,</if>
+            <if test="endTime != null">END_TIME,</if>
+            <if test="approveStatus != null">APPROVE_STATUS,</if>
+            <if test="budget != null">BUDGET,</if>
+            <if test="xiaoxiangPayNum != null">XIAOXIANG_PAY_NUM,</if>
+            <if test="orgName != null">ORG_NAME,</if>
+            <if test="orgPayNum != null">ORG_PAY_NUM,</if>
+            <if test="merchantPayNum != null">MERCHANT_PAY_NUM,</if>
+            <if test="alarmNum != null">ALARM_NUM,</if>
+            <if test="alarmContent != null">ALARM_CONTENT,</if>
+            <if test="alarmPhone != null">ALARM_PHONE,</if>
+            <if test="alarmEmail != null">ALARM_EMAIL,</if>
+            <if test="payMethod != null">PAY_METHOD,</if>
+            <if test="effectTime != null">EFFECT_TIME,</if>
+            <if test="limitNum != null">LIMIT_NUM,</if>
+            <if test="useRule != null">USE_RULE,</if>
+            <if test="contractPhoto != null">CONTRACT_PHOTO,</if>
+            <if test="shareFlag != null">SHARE_FLAG,</if>
+            <if test="shareTitle != null">SHARE_TITLE,</if>
+            <if test="shareContent != null">SHARE_CONTENT,</if>
+            <if test="sharePhoto != null">SHARE_PHOTO,</if>
+            <if test="detailPhoto != null">DETAIL_PHOTO,</if>
+            <if test="createBy != null">CREATE_BY,</if>
+            <if test="createTime != null">CREATE_TIME,</if>
+            <if test="updateBy != null">UPDATE_BY,</if>
+            <if test="updateTime != null">UPDATE_TIME,</if>
+            <if test="delFlag != null">DEL_FLAG,</if>
+            <if test="status != null">STATUS,</if>
+            <if test="auditRemark != null">AUDIT_REMARK,</if>
+            <if test="auditTime != null">AUDIT_TIME,</if>
+            <if test="regionName != null">RANGE_NAME,</if>
+            <if test="regionCode != null">RANGE_CODE,</if>
+            <if test="operationType != null">OPERATION_TYPE,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="activityAbb != null">#{activityAbb},</if>
+            <if test="activityName != null">#{activityName},</if>
+            <if test="startTime != null">#{startTime},</if>
+            <if test="endTime != null">#{endTime},</if>
+            <if test="approveStatus != null">#{approveStatus},</if>
+            <if test="budget != null">#{budget},</if>
+            <if test="xiaoxiangPayNum != null">#{xiaoxiangPayNum},</if>
+            <if test="orgName != null">#{orgName},</if>
+            <if test="orgPayNum != null">#{orgPayNum},</if>
+            <if test="merchantPayNum != null">#{merchantPayNum},</if>
+            <if test="alarmNum != null">#{alarmNum},</if>
+            <if test="alarmContent != null">#{alarmContent},</if>
+            <if test="alarmPhone != null">#{alarmPhone},</if>
+            <if test="alarmEmail != null">#{alarmEmail},</if>
+            <if test="payMethod != null">#{payMethod},</if>
+            <if test="effectTime != null">#{effectTime},</if>
+            <if test="limitNum != null">#{limitNum},</if>
+            <if test="useRule != null">#{useRule},</if>
+            <if test="contractPhoto != null">#{contractPhoto},</if>
+            <if test="shareFlag != null">#{shareFlag},</if>
+            <if test="shareTitle != null">#{shareTitle},</if>
+            <if test="shareContent != null">#{shareContent},</if>
+            <if test="sharePhoto != null">#{sharePhoto},</if>
+            <if test="detailPhoto != null">#{detailPhoto},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+            <if test="status != null">#{status},</if>
+            <if test="auditRemark != null">#{auditRemark},</if>
+            <if test="auditTime != null">#{auditTime},</if>
+            <if test="regionName != null">#{regionName},</if>
+            <if test="regionCode != null">#{regionCode},</if>
+            <if test="operationType != null">#{operationType},</if>
+         </trim>
+    </insert>
+
+    <update id="updateActivityInfo">
+        update T_ACTIVITY_INFO
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="activityAbb != null">ACTIVITY_ABB = #{activityAbb},</if>
+            <if test="activityName != null">ACTIVITY_NAME = #{activityName},</if>
+            <if test="startTime != null">START_TIME = #{startTime},</if>
+            <if test="endTime != null">END_TIME = #{endTime},</if>
+            <if test="approveStatus != null">APPROVE_STATUS = #{approveStatus},</if>
+            <if test="budget != null">BUDGET = #{budget},</if>
+            <if test="xiaoxiangPayNum != null">XIAOXIANG_PAY_NUM = #{xiaoxiangPayNum},</if>
+            <if test="orgName != null">ORG_NAME = #{orgName},</if>
+            <if test="orgPayNum != null">ORG_PAY_NUM = #{orgPayNum},</if>
+            <if test="merchantPayNum != null">MERCHANT_PAY_NUM = #{merchantPayNum},</if>
+            <if test="alarmNum != null">ALARM_NUM = #{alarmNum},</if>
+            <if test="alarmContent != null">ALARM_CONTENT = #{alarmContent},</if>
+            <if test="alarmPhone != null">ALARM_PHONE = #{alarmPhone},</if>
+            <if test="alarmEmail != null">ALARM_EMAIL = #{alarmEmail},</if>
+            <if test="payMethod != null">PAY_METHOD = #{payMethod},</if>
+            <if test="effectTime != null">EFFECT_TIME = #{effectTime},</if>
+            <if test="limitNum != null">LIMIT_NUM = #{limitNum},</if>
+            <if test="useRule != null">USE_RULE = #{useRule},</if>
+            <if test="contractPhoto != null and contractPhoto != ''">CONTRACT_PHOTO = #{contractPhoto},</if>
+            <if test="shareFlag != null">SHARE_FLAG = #{shareFlag},</if>
+            <if test="shareTitle != null">SHARE_TITLE = #{shareTitle},</if>
+            <if test="shareContent != null">SHARE_CONTENT = #{shareContent},</if>
+            <if test="sharePhoto != null and sharePhoto != ''">SHARE_PHOTO = #{sharePhoto},</if>
+            <if test="detailPhoto != null and detailPhoto != ''">DETAIL_PHOTO = #{detailPhoto},</if>
+            <if test="createBy != null">CREATE_BY = #{createBy},</if>
+            <if test="createTime != null">CREATE_TIME = #{createTime},</if>
+            <if test="updateBy != null">UPDATE_BY = #{updateBy},</if>
+            <if test="updateTime != null">UPDATE_TIME = #{updateTime},</if>
+            <if test="delFlag != null">DEL_FLAG = #{delFlag},</if>
+            <if test="status != null">STATUS = #{status},</if>
+            <if test="auditRemark != null">AUDIT_REMARK = #{auditRemark},</if>
+            <if test="auditTime != null">AUDIT_TIME = #{auditTime},</if>
+            <if test="regionName != null">RANGE_NAME = #{regionName},</if>
+            <if test="regionCode != null">RANGE_CODE = #{regionCode},</if>
+            <if test="operationType != null">OPERATION_TYPE = #{operationType},</if>
+        </trim>
+        where ID = #{id}
+    </update>
+
+    <delete id="deleteActivityInfoByIds" parameterType="String">
+        update T_ACTIVITY_INFO set DEL_FLAG = 1, UPDATE_TIME = SYSDATE, UPDATE_BY = #{userId}
+        where ID in
+        <foreach item="id" collection="list" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="getListByCoupon" resultMap="baseMap">
+        SELECT
+            tci.ID,
+            tci.ACTIVITY_NAME,
+            tci.START_TIME,
+            tci.END_TIME,
+            tci.APPROVE_STATUS,
+            tci.STATUS
+        FROM
+            T_ACTIVITY_INFO tci
+            inner JOIN T_ACTIVITY_COUPON tac ON tci.ID = tac.ACTIVITY_ID
+            AND tac.DEL_FLAG = 0
+        WHERE
+            tci.DEL_FLAG = 0
+        <if test="couponId != null and couponId != ''">
+            AND tac.COUPON_ID = #{couponId}
+        </if>
+        <if test="activityName != null and activityName != ''">
+            AND tci.ACTIVITY_NAME = #{activityName}
+        </if>
+        <if test="approveStatus != null and approveStatus != ''">
+            AND tci.APPROVE_STATUS = #{approveStatus}
+        </if>
+        <if test="status != null and status != ''">
+            AND tci.STATUS = #{status}
+        </if>
+    </select>
+
+    <select id="getActivityNum" resultType="int">
+        select count(*) from T_ACTIVITY_INFO where DEL_FLAG = 0
+         <if test="beginTime != null and beginTime != '' and endTime != null and endTime != ''">
+             and ((to_char(START_TIME,'yyyy-mm-dd hh24:mi:ss') &gt;= #{beginTime}
+             and to_char(START_TIME,'yyyy-mm-dd hh24:mi:ss') &lt;= #{endTime})
+             or (to_char(START_TIME,'yyyy-mm-dd hh24:mi:ss') &lt;= #{beginTime}
+             and to_char(END_TIME,'yyyy-mm-dd hh24:mi:ss') &gt;= #{endTime})
+             or (to_char(END_TIME,'yyyy-mm-dd hh24:mi:ss') &gt;= #{beginTime}
+             and to_char(END_TIME,'yyyy-mm-dd hh24:mi:ss') &lt;= #{endTime}))
+         </if>
+    </select>
+
+    <select id="getAppActivityList" resultMap="baseMap">
+        select <include refid="all_column"/> from T_ACTIVITY_INFO
+        where DEL_FLAG = 0 and APPROVE_STATUS = '1' and STATUS = '1'
+    </select>
+</mapper>

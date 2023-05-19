@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration scan="true" scanPeriod="30 seconds">
+    <property name="logBase" value="../logs"/>
+    <property name="log.archive.max.file.size" value="60MB"/>
+    <property name="log.archive.max.history" value="15"/>
+    <property name="serviceName" value="market"/>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>
+                %date [%thread] %highlight(%-5level) %logger{36} [%file:%line] %msg%n
+            </pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- 服务日志 -->
+    <appender name="ROOT_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${logBase}/${serviceName}_ROOT.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- rollover daily -->
+            <fileNamePattern>${logBase}/${serviceName}_ROOT-%d{yyyy-MM-dd}.%i.log
+            </fileNamePattern>
+            <maxHistory>${log.archive.max.history}</maxHistory>
+            <maxFileSize>${log.archive.max.file.size}</maxFileSize>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%date [%thread] %-5level %logger{10} [%file:%line] %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="ROOT_LOG"/>
+        <appender-ref ref="STDOUT"/>
+    </root>
+</configuration>

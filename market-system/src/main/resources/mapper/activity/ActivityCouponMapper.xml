@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.market.activity.mapper.ActivityCouponMapper">
+
+    <resultMap type="com.market.activity.model.ActivityCouponInfo" id="baseMap">
+        <result property="id"    column="ID"    />
+        <result property="activityId"    column="ACTIVITY_ID"    />
+        <result property="couponId"    column="COUPON_ID"    />
+        <result property="inventoryNum"    column="INVENTORY_NUM"    />
+        <result property="grantNum"    column="GRANT_NUM"    />
+        <result property="takeDateNum"    column="TAKE_DATE_NUM"    />
+        <result property="effectDateNum"    column="EFFECT_DATE_NUM"    />
+        <result property="sameActivityFlag"    column="SAME_ACTIVITY_FLAG"    />
+        <result property="diffActivityFlag"    column="DIFF_ACTIVITY_FLAG"    />
+        <result property="outActivityFlag"    column="OUT_ACTIVITY_FLAG"    />
+        <result property="createBy"    column="CREATE_BY"    />
+        <result property="createTime"    column="CREATE_TIME"    />
+        <result property="updateBy"    column="UPDATE_BY"    />
+        <result property="updateTime"    column="UPDATE_TIME"    />
+        <result property="delFlag"    column="DEL_FLAG"    />
+        <result property="effectStartTime"    column="EFFECT_START_TIME"    />
+        <result property="effectEndTime"    column="EFFECT_END_TIME"    />
+        <result property="effectType"    column="EFFECT_TYPE"    />
+        <result property="alarmNum"    column="ALARM_NUM"    />
+        <result property="alarmContent"    column="ALARM_CONTENT"    />
+        <result property="alarmPhone"    column="ALARM_PHONE"    />
+        <result property="alarmEmail"    column="ALARM_EMAIL"    />
+        <result property="receiveType"    column="RECEIVE_TYPE"    />
+
+    </resultMap>
+
+    <sql id="all_column">
+        ID, ACTIVITY_ID, COUPON_ID, INVENTORY_NUM, GRANT_NUM, TAKE_DATE_NUM,
+        EFFECT_DATE_NUM, SAME_ACTIVITY_FLAG, DIFF_ACTIVITY_FLAG, OUT_ACTIVITY_FLAG,
+        CREATE_BY, CREATE_TIME, UPDATE_BY, UPDATE_TIME, DEL_FLAG, EFFECT_START_TIME,
+        EFFECT_END_TIME, EFFECT_TYPE, ALARM_NUM, ALARM_CONTENT, ALARM_PHONE, ALARM_EMAIL, RECEIVE_TYPE
+    </sql>
+
+    <select id="getDataList" resultMap="baseMap">
+        select <include refid="all_column"/> from T_ACTIVITY_COUPON
+        where DEL_FLAG = 0
+        <if test="activityId != null  and activityId != ''"> and ACTIVITY_ID = #{activityId}</if>
+        <if test="couponId != null  and couponId != ''"> and COUPON_ID = #{couponId}</if>
+        <if test="activityIds != null and activityIds.size() > 0">
+            and ACTIVITY_ID in
+            <foreach collection="activityIds" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+    </select>
+
+    <insert id="insertData" parameterType="java.util.List" useGeneratedKeys="false">
+        insert into T_ACTIVITY_COUPON(ID, ACTIVITY_ID, COUPON_ID, INVENTORY_NUM, GRANT_NUM, TAKE_DATE_NUM,
+        EFFECT_DATE_NUM, SAME_ACTIVITY_FLAG, DIFF_ACTIVITY_FLAG, OUT_ACTIVITY_FLAG,
+        CREATE_BY, CREATE_TIME, UPDATE_BY, UPDATE_TIME, DEL_FLAG, EFFECT_START_TIME,
+        EFFECT_END_TIME, EFFECT_TYPE, ALARM_NUM, ALARM_CONTENT, ALARM_PHONE, ALARM_EMAIL, RECEIVE_TYPE)
+        <foreach item="item" index="index" collection="list" separator=" union all ">
+            select
+            #{item.id,jdbcType=VARCHAR},
+            #{item.activityId,jdbcType=VARCHAR},
+            #{item.couponId,jdbcType=VARCHAR},
+            #{item.inventoryNum,jdbcType=INTEGER},
+            #{item.grantNum,jdbcType=INTEGER},
+            #{item.takeDateNum,jdbcType=INTEGER},
+            #{item.effectDateNum,jdbcType=INTEGER},
+            #{item.sameActivityFlag,jdbcType=CHAR},
+            #{item.diffActivityFlag,jdbcType=CHAR},
+            #{item.outActivityFlag,jdbcType=CHAR},
+            #{item.createBy,jdbcType=VARCHAR},
+            #{item.createTime,jdbcType=DATE},
+            #{item.updateBy,jdbcType=VARCHAR},
+            #{item.updateTime,jdbcType=DATE},
+            #{item.delFlag,jdbcType=CHAR},
+            #{item.effectStartTime,jdbcType=DATE},
+            #{item.effectEndTime,jdbcType=DATE},
+            #{item.effectType,jdbcType=CHAR},
+            #{item.alarmNum,jdbcType=DECIMAL},
+            #{item.alarmContent,jdbcType=CLOB},
+            #{item.alarmPhone,jdbcType=CLOB},
+            #{item.alarmEmail,jdbcType=CLOB},
+            #{item.receiveType,jdbcType=CHAR}
+            from dual
+        </foreach>
+    </insert>
+
+    <select id="getDataListByCoupon" resultType="com.market.coupon.model.ActivityCouponEntity">
+        SELECT
+            tci.ID as id,
+            tci.COUPON_NAME as couponName,
+            tci.COUPON_CODE as couponCode,
+            tci.COUPON_TYPE as couponType,
+            tci.COUPON_PHOTO as couponPhoto
+        FROM
+            T_ACTIVITY_COUPON tac
+            LEFT JOIN T_COUPON_INFO tci ON tac.COUPON_ID = tci.ID
+            AND tci.DEL_FLAG = 0
+        WHERE
+            tac.DEL_FLAG = 0
+        <if test="activityId != null and activityId != ''">
+            AND tac.ACTIVITY_ID = #{activityId}
+        </if>
+        <if test="businessType != null and businessType != ''">
+            AND tci.BUSINESS_TYPE = #{businessType}
+        </if>
+        <if test="couponType != null and couponType != ''">
+            AND tci.COUPON_TYPE = #{couponType}
+        </if>
+        <if test="couponName != null and couponName != ''">
+            AND tci.COUPON_NAME = #{couponName}
+        </if>
+        <if test="couponCode != null and couponCode != ''">
+            AND tci.COUPON_CODE = #{couponCode}
+        </if>
+    </select>
+
+    <select id="getCouponDetailList" resultType="com.market.activity.model.GrantInfo">
+        SELECT
+            tci.ID as couponId,
+            tci.COUPON_NAME as couponName,
+            tac.INVENTORY_NUM as inventoryNum
+        FROM
+            T_ACTIVITY_COUPON tac
+            LEFT JOIN T_COUPON_INFO tci ON tac.COUPON_ID = tci.ID
+            AND tci.DEL_FLAG = 0
+        WHERE
+            tac.DEL_FLAG = 0
+        <if test="activityId != null and activityId != ''">
+            AND tac.ACTIVITY_ID = #{activityId}
+        </if>
+    </select>
+
+    <select id="getGrantList" resultType="com.market.activity.model.GrantInfo">
+        select
+        COUPON_ID as couponId,
+        SUM(GRANT_NUM) as grantNum
+        from T_GRANT_INFO
+        <where>
+            <if test="activityId != null and activityId != ''">
+                and ACTIVITY_ID = #{activityId}
+            </if>
+            <if test="couponId != null and couponId != ''">
+                and COUPON_ID = #{couponId}
+            </if>
+        </where>
+        group by COUPON_ID
+    </select>
+
+    <update id="update">
+        update T_ACTIVITY_COUPON set INVENTORY_NUM = #{inventoryNum}, UPDATE_BY = #{updateBy},
+        UPDATE_TIME = #{updateTime}
+        where ACTIVITY_ID = #{activityId} and COUPON_ID = #{couponId} and DEL_FLAG = '0'
+    </update>
+
+    <select id="getCouponDataList" resultMap="baseMap">
+        SELECT
+        tci.ID as COUPON_ID,
+        tci.COUPON_NAME as couponName,
+        tci.COUPON_CODE as couponCode,
+        tci.COUPON_TYPE as couponType,
+        tac.INVENTORY_NUM,
+        tac.EFFECT_START_TIME,
+        tac.EFFECT_END_TIME,
+        tac.EFFECT_TYPE,
+        tac.TAKE_DATE_NUM,
+        tac.EFFECT_DATE_NUM,
+        tac.RECEIVE_TYPE,
+        tac.SAME_ACTIVITY_FLAG,
+        tac.DIFF_ACTIVITY_FLAG,
+        tac.OUT_ACTIVITY_FLAG,
+        tac.ALARM_NUM,
+        tac.ALARM_CONTENT,
+        tac.ALARM_PHONE,
+        tac.ALARM_EMAIL
+        FROM
+        T_ACTIVITY_COUPON tac
+        LEFT JOIN T_COUPON_INFO tci ON tac.COUPON_ID = tci.ID
+        AND tci.DEL_FLAG = 0
+        WHERE
+        tac.DEL_FLAG = 0
+        <if test="activityId != null and activityId != ''">
+            AND tac.ACTIVITY_ID = #{activityId}
+        </if>
+    </select>
+
+</mapper>

@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.market.org.mapper.OrgMapper">
+
+    <resultMap type="com.market.org.model.OrgInfo" id="BaseMap">
+        <result property="id"    column="ID"    />
+        <result property="orgName"    column="ORG_NAME"    />
+        <result property="orgCode"    column="ORG_CODE"    />
+        <result property="roleType"    column="ROLE_TYPE"    />
+        <result property="orgType"    column="ORG_TYPE"    />
+        <result property="licenseNumber"    column="LICENSE_NUMBER"    />
+        <result property="licenseTime"    column="LICENSE_TIME"    />
+        <result property="licensePhoto"    column="LICENSE_PHOTO"    />
+        <result property="companyName"    column="COMPANY_NAME"    />
+        <result property="companyPhone"    column="COMPANY_PHONE"    />
+        <result property="companyRePerson"    column="COMPANY_RE_PERSON"    />
+        <result property="reIdcard"    column="RE_IDCARD"    />
+        <result property="creditCode"    column="CREDIT_CODE"    />
+        <result property="registerAmount"    column="REGISTER_AMOUNT"    />
+        <result property="businessAddress"    column="BUSINESS_ADDRESS"    />
+        <result property="postCode"    column="POST_CODE"    />
+        <result property="businessScope"    column="BUSINESS_SCOPE"    />
+        <result property="companyIntroduction"    column="COMPANY_INTRODUCTION"    />
+        <result property="invoiceName"    column="INVOICE_NAME"    />
+        <result property="bankName"    column="BANK_NAME"    />
+        <result property="bankNumber"    column="BANK_NUMBER"    />
+        <result property="taxCode"    column="TAX_CODE"    />
+        <result property="companyAddress"    column="COMPANY_ADDRESS"    />
+        <result property="contactName"    column="CONTACT_NAME"    />
+        <result property="contactPhone"    column="CONTACT_PHONE"    />
+        <result property="contactEmail"    column="CONTACT_EMAIL"    />
+        <result property="contactAddress"    column="CONTACT_ADDRESS"    />
+        <result property="delFlag"    column="DEL_FLAG"    />
+        <result property="createBy"    column="CREATE_BY"    />
+        <result property="createTime"    column="CREATE_TIME"    />
+        <result property="updateBy"    column="UPDATE_BY"    />
+        <result property="updateTime"    column="UPDATE_TIME"    />
+        <result property="auditStatus"    column="AUDIT_STATUS"    />
+        <result property="remark"    column="REMARK"    />
+        <result property="auditTime"    column="AUDIT_TIME"    />
+        <result property="registerAddress"    column="REGISTER_ADDRESS"    />
+        <result property="companyNum"    column="COMPANY_NUM"    />
+        <result property="companyCode"    column="COMPANY_CODE"    />
+        <result property="invoicePhone"    column="INVOICE_PHONE"    />
+    </resultMap>
+
+    <sql id="all_column">
+        ID, ORG_NAME, ORG_CODE, ROLE_TYPE, ORG_TYPE, LICENSE_NUMBER, LICENSE_TIME, LICENSE_PHOTO, COMPANY_NAME,
+        COMPANY_PHONE, COMPANY_RE_PERSON, RE_IDCARD, CREDIT_CODE, REGISTER_AMOUNT,
+        BUSINESS_ADDRESS, POST_CODE, BUSINESS_SCOPE, COMPANY_INTRODUCTION, INVOICE_NAME, BANK_NAME,
+        BANK_NUMBER, TAX_CODE, COMPANY_ADDRESS, CONTACT_NAME, CONTACT_PHONE, CONTACT_EMAIL,
+        CONTACT_ADDRESS, DEL_FLAG, CREATE_BY, CREATE_TIME, UPDATE_BY, UPDATE_TIME, AUDIT_STATUS, REMARK,
+        AUDIT_TIME, REGISTER_ADDRESS, COMPANY_NUM, COMPANY_CODE, INVOICE_PHONE
+    </sql>
+
+    <select id="selectOrgInfoList" resultMap="BaseMap">
+        select <include refid="all_column"/> from T_ORG
+        <where>
+            <if test="orgName != null  and orgName != ''"> and ORG_NAME like concat(concat('%', #{orgName}), '%')</if>
+            <if test="orgCode != null  and orgCode != ''"> and ORG_CODE like concat(concat('%', #{orgCode}), '%')</if>
+            <if test="roleType != null  and roleType != ''"> and ROLE_TYPE = #{roleType}</if>
+            <if test="orgType != null  and orgType != ''"> and ORG_TYPE = #{orgType}</if>
+            <if test="licenseNumber != null  and licenseNumber != ''"> and LICENSE_NUMBER = #{licenseNumber}</if>
+            <if test="licenseTime != null "> and LICENSE_TIME = #{licenseTime}</if>
+            <if test="licensePhoto != null  and licensePhoto != ''"> and LICENSE_PHOTO = #{licensePhoto}</if>
+            <if test="companyName != null  and companyName != ''"> and COMPANY_NAME like concat(concat('%', #{companyName}), '%')</if>
+            <if test="companyPhone != null  and companyPhone != ''"> and COMPANY_PHONE = #{companyPhone}</if>
+            <if test="companyRePerson != null  and companyRePerson != ''"> and COMPANY_RE_PERSON = #{companyRePerson}</if>
+            <if test="reIdcard != null  and reIdcard != ''"> and RE_IDCARD = #{reIdcard}</if>
+            <if test="creditCode != null  and creditCode != ''"> and CREDIT_CODE = #{creditCode}</if>
+            <if test="registerAmount != null "> and REGISTER_AMOUNT = #{registerAmount}</if>
+            <if test="businessAddress != null  and businessAddress != ''"> and BUSINESS_ADDRESS = #{businessAddress}</if>
+            <if test="postCode != null  and postCode != ''"> and POST_CODE = #{postCode}</if>
+            <if test="businessScope != null  and businessScope != ''"> and BUSINESS_SCOPE = #{businessScope}</if>
+            <if test="companyIntroduction != null  and companyIntroduction != ''"> and COMPANY_INTRODUCTION = #{companyIntroduction}</if>
+            <if test="invoiceName != null  and invoiceName != ''"> and INVOICE_NAME like concat(concat('%', #{invoiceName}), '%')</if>
+            <if test="bankName != null  and bankName != ''"> and BANK_NAME like concat(concat('%', #{bankName}), '%')</if>
+            <if test="bankNumber != null  and bankNumber != ''"> and BANK_NUMBER = #{bankNumber}</if>
+            <if test="taxCode != null  and taxCode != ''"> and TAX_CODE = #{taxCode}</if>
+            <if test="companyAddress != null  and companyAddress != ''"> and COMPANY_ADDRESS = #{companyAddress}</if>
+            <if test="contactName != null  and contactName != ''"> and CONTACT_NAME like concat(concat('%', #{contactName}), '%')</if>
+            <if test="contactPhone != null  and contactPhone != ''"> and CONTACT_PHONE = #{contactPhone}</if>
+            <if test="contactEmail != null  and contactEmail != ''"> and CONTACT_EMAIL = #{contactEmail}</if>
+            <if test="contactAddress != null  and contactAddress != ''"> and CONTACT_ADDRESS = #{contactAddress}</if>
+            <if test="auditStatus != null  and auditStatus != ''"> and AUDIT_STATUS = #{auditStatus}</if>
+            and DEL_FLAG = 0
+        </where>
+        order by CREATE_TIME desc
+    </select>
+
+    <select id="selectOrgInfoById" parameterType="String" resultMap="BaseMap">
+        select <include refid="all_column"/> from T_ORG
+        where ID = #{id}
+    </select>
+
+    <insert id="insertOrgInfo">
+        insert into T_ORG
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">ID,</if>
+            <if test="orgCode != null">ORG_CODE,</if>
+            <if test="roleType != null">ROLE_TYPE,</if>
+            <if test="orgType != null">ORG_TYPE,</if>
+            <if test="licenseNumber != null">LICENSE_NUMBER,</if>
+            <if test="licenseTime != null">LICENSE_TIME,</if>
+            <if test="licensePhoto != null">LICENSE_PHOTO,</if>
+            <if test="companyName != null">COMPANY_NAME,</if>
+            <if test="companyPhone != null">COMPANY_PHONE,</if>
+            <if test="companyRePerson != null">COMPANY_RE_PERSON,</if>
+            <if test="reIdcard != null">RE_IDCARD,</if>
+            <if test="creditCode != null">CREDIT_CODE,</if>
+            <if test="registerAmount != null">REGISTER_AMOUNT,</if>
+            <if test="businessAddress != null">BUSINESS_ADDRESS,</if>
+            <if test="postCode != null">POST_CODE,</if>
+            <if test="businessScope != null">BUSINESS_SCOPE,</if>
+            <if test="companyIntroduction != null">COMPANY_INTRODUCTION,</if>
+            <if test="invoiceName != null">INVOICE_NAME,</if>
+            <if test="bankName != null">BANK_NAME,</if>
+            <if test="bankNumber != null">BANK_NUMBER,</if>
+            <if test="taxCode != null">TAX_CODE,</if>
+            <if test="companyAddress != null">COMPANY_ADDRESS,</if>
+            <if test="contactName != null">CONTACT_NAME,</if>
+            <if test="contactPhone != null">CONTACT_PHONE,</if>
+            <if test="contactEmail != null">CONTACT_EMAIL,</if>
+            <if test="contactAddress != null">CONTACT_ADDRESS,</if>
+            <if test="delFlag != null">DEL_FLAG,</if>
+            <if test="createBy != null">CREATE_BY,</if>
+            <if test="createTime != null">CREATE_TIME,</if>
+            <if test="updateBy != null">UPDATE_BY,</if>
+            <if test="updateTime != null">UPDATE_TIME,</if>
+            <if test="orgName != null">ORG_NAME,</if>
+            <if test="auditStatus != null">AUDIT_STATUS,</if>
+            <if test="remark != null">REMARK,</if>
+            <if test="auditTime != null">AUDIT_TIME,</if>
+            <if test="registerAddress != null">REGISTER_ADDRESS,</if>
+            <if test="companyNum != null">COMPANY_NUM,</if>
+            <if test="companyCode != null">COMPANY_CODE,</if>
+            <if test="invoicePhone != null">INVOICE_PHONE,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="orgCode != null">#{orgCode},</if>
+            <if test="roleType != null">#{roleType},</if>
+            <if test="orgType != null">#{orgType},</if>
+            <if test="licenseNumber != null">#{licenseNumber},</if>
+            <if test="licenseTime != null">#{licenseTime},</if>
+            <if test="licensePhoto != null">#{licensePhoto},</if>
+            <if test="companyName != null">#{companyName},</if>
+            <if test="companyPhone != null">#{companyPhone},</if>
+            <if test="companyRePerson != null">#{companyRePerson},</if>
+            <if test="reIdcard != null">#{reIdcard},</if>
+            <if test="creditCode != null">#{creditCode},</if>
+            <if test="registerAmount != null">#{registerAmount},</if>
+            <if test="businessAddress != null">#{businessAddress},</if>
+            <if test="postCode != null">#{postCode},</if>
+            <if test="businessScope != null">#{businessScope},</if>
+            <if test="companyIntroduction != null">#{companyIntroduction},</if>
+            <if test="invoiceName != null">#{invoiceName},</if>
+            <if test="bankName != null">#{bankName},</if>
+            <if test="bankNumber != null">#{bankNumber},</if>
+            <if test="taxCode != null">#{taxCode},</if>
+            <if test="companyAddress != null">#{companyAddress},</if>
+            <if test="contactName != null">#{contactName},</if>
+            <if test="contactPhone != null">#{contactPhone},</if>
+            <if test="contactEmail != null">#{contactEmail},</if>
+            <if test="contactAddress != null">#{contactAddress},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="orgName != null">#{orgName},</if>
+            <if test="auditStatus != null">#{auditStatus},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="auditTime != null">#{auditTime},</if>
+            <if test="registerAddress != null">#{registerAddress},</if>
+            <if test="companyNum != null">#{companyNum},</if>
+            <if test="companyCode != null">#{companyCode},</if>
+            <if test="invoicePhone != null">#{invoicePhone},</if>
+         </trim>
+    </insert>
+
+    <update id="updateOrgInfo">
+        update T_ORG
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="orgCode != null">ORG_CODE = #{orgCode},</if>
+            <if test="roleType != null">ROLE_TYPE = #{roleType},</if>
+            <if test="orgType != null">ORG_TYPE = #{orgType},</if>
+            <if test="licenseNumber != null">LICENSE_NUMBER = #{licenseNumber},</if>
+            <if test="licenseTime != null">LICENSE_TIME = #{licenseTime},</if>
+            <if test="licensePhoto != null">LICENSE_PHOTO = #{licensePhoto},</if>
+            <if test="companyName != null">COMPANY_NAME = #{companyName},</if>
+            <if test="companyPhone != null">COMPANY_PHONE = #{companyPhone},</if>
+            <if test="companyRePerson != null">COMPANY_RE_PERSON = #{companyRePerson},</if>
+            <if test="reIdcard != null">RE_IDCARD = #{reIdcard},</if>
+            <if test="creditCode != null">CREDIT_CODE = #{creditCode},</if>
+            <if test="registerAmount != null">REGISTER_AMOUNT = #{registerAmount},</if>
+            <if test="businessAddress != null">BUSINESS_ADDRESS = #{businessAddress},</if>
+            <if test="postCode != null">POST_CODE = #{postCode},</if>
+            <if test="businessScope != null">BUSINESS_SCOPE = #{businessScope},</if>
+            <if test="companyIntroduction != null">COMPANY_INTRODUCTION = #{companyIntroduction},</if>
+            <if test="invoiceName != null">INVOICE_NAME = #{invoiceName},</if>
+            <if test="bankName != null">BANK_NAME = #{bankName},</if>
+            <if test="bankNumber != null">BANK_NUMBER = #{bankNumber},</if>
+            <if test="taxCode != null">TAX_CODE = #{taxCode},</if>
+            <if test="companyAddress != null">COMPANY_ADDRESS = #{companyAddress},</if>
+            <if test="contactName != null">CONTACT_NAME = #{contactName},</if>
+            <if test="contactPhone != null">CONTACT_PHONE = #{contactPhone},</if>
+            <if test="contactEmail != null">CONTACT_EMAIL = #{contactEmail},</if>
+            <if test="contactAddress != null">CONTACT_ADDRESS = #{contactAddress},</if>
+            <if test="delFlag != null">DEL_FLAG = #{delFlag},</if>
+            <if test="createBy != null">CREATE_BY = #{createBy},</if>
+            <if test="updateBy != null">UPDATE_BY = #{updateBy},</if>
+            <if test="orgName != null">ORG_NAME = #{orgName},</if>
+            <if test="auditStatus != null">AUDIT_STATUS = #{auditStatus},</if>
+            <if test="remark != null">REMARK = #{remark},</if>
+            <if test="auditTime != null">AUDIT_TIME = #{auditTime},</if>
+            <if test="registerAddress != null">REGISTER_ADDRESS=#{registerAddress},</if>
+            <if test="companyNum != null">COMPANY_NUM=#{companyNum},</if>
+            <if test="companyCode != null">COMPANY_CODE=#{companyCode},</if>
+            <if test="invoicePhone != null">INVOICE_PHONE=#{invoicePhone},</if>
+            UPDATE_TIME = SYSDATE
+        </trim>
+        where ID = #{id} and DEL_FLAG = 0
+    </update>
+
+    <update id="deleteOrgInfoByIds" parameterType="String">
+        update T_ORG set DEL_FLAG = 1, UPDATE_TIME = SYSDATE, UPDATE_BY = #{updateUser} where ID in
+        <foreach item="id" collection="list" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <select id="getListDataByName" resultMap="BaseMap">
+        select <include refid="all_column"/> from T_ORG where DEL_FLAG = 0
+        <if test="list != null and list.size() > 0">
+            and ORG_NAME in
+            <foreach item="item" collection="list" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+    </select>
+
+    <insert id="batchInsert" parameterType="list" useGeneratedKeys="false">
+        insert into T_ORG(ID,ORG_CODE,ROLE_TYPE,ORG_TYPE,LICENSE_NUMBER,LICENSE_TIME,
+        LICENSE_PHOTO,COMPANY_NAME,COMPANY_PHONE,COMPANY_RE_PERSON,RE_IDCARD,
+        CREDIT_CODE,REGISTER_AMOUNT,BUSINESS_ADDRESS,POST_CODE,BUSINESS_SCOPE,
+        INVOICE_NAME,BANK_NAME,BANK_NUMBER,TAX_CODE,COMPANY_ADDRESS,CONTACT_NAME,
+        CONTACT_PHONE,CONTACT_EMAIL,CONTACT_ADDRESS,DEL_FLAG,CREATE_BY,CREATE_TIME,
+        UPDATE_BY,UPDATE_TIME,ORG_NAME,AUDIT_STATUS,AUDIT_TIME,REGISTER_ADDRESS,
+        COMPANY_NUM,COMPANY_CODE,INVOICE_PHONE,COMPANY_INTRODUCTION,REMARK)
+        <foreach item="item" index="index" collection="list" separator=" union all ">
+            select
+            #{item.id,jdbcType=VARCHAR},
+            #{item.orgCode,jdbcType=VARCHAR},
+            #{item.roleType,jdbcType=CHAR},
+            #{item.orgType,jdbcType=CHAR},
+            #{item.licenseNumber,jdbcType=VARCHAR},
+            #{item.licenseTime,jdbcType=DATE},
+            #{item.licensePhoto,jdbcType=VARCHAR},
+            #{item.companyName,jdbcType=VARCHAR},
+            #{item.companyPhone,jdbcType=VARCHAR},
+            #{item.companyRePerson,jdbcType=VARCHAR},
+            #{item.reIdcard,jdbcType=VARCHAR},
+            #{item.creditCode,jdbcType=VARCHAR},
+            #{item.registerAmount,jdbcType=DECIMAL},
+            #{item.businessAddress,jdbcType=VARCHAR},
+            #{item.postCode,jdbcType=VARCHAR},
+            #{item.businessScope,jdbcType=VARCHAR},
+            #{item.invoiceName,jdbcType=VARCHAR},
+            #{item.bankName,jdbcType=VARCHAR},
+            #{item.bankNumber,jdbcType=VARCHAR},
+            #{item.taxCode,jdbcType=VARCHAR},
+            #{item.companyAddress,jdbcType=VARCHAR},
+            #{item.contactName,jdbcType=VARCHAR},
+            #{item.contactPhone,jdbcType=VARCHAR},
+            #{item.contactEmail,jdbcType=VARCHAR},
+            #{item.contactAddress,jdbcType=VARCHAR},
+            #{item.delFlag,jdbcType=CHAR},
+            #{item.createBy,jdbcType=VARCHAR},
+            #{item.createTime,jdbcType=DATE},
+            #{item.updateBy,jdbcType=VARCHAR},
+            #{item.updateTime,jdbcType=DATE},
+            #{item.orgName,jdbcType=VARCHAR},
+            #{item.auditStatus,jdbcType=CHAR},
+            #{item.auditTime,jdbcType=DATE},
+            #{item.registerAddress,jdbcType=VARCHAR},
+            #{item.companyNum,jdbcType=INTEGER},
+            #{item.companyCode,jdbcType=VARCHAR},
+            #{item.invoicePhone,jdbcType=VARCHAR},
+            #{item.companyIntroduction,jdbcType=VARCHAR},
+            #{item.remark,jdbcType=VARCHAR}
+            from dual
+        </foreach>
+    </insert>
+</mapper>
