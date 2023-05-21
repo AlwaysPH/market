@@ -2,6 +2,7 @@ package com.market.activity.mapper;
 
 import com.market.activity.model.CardInfo;
 import com.market.coupon.model.AppParams;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -27,4 +28,12 @@ public interface ActivitySpecialUserMapper {
      * @return
      */
     int getSpecialData(AppParams params);
+
+    /**
+     * 删除活动指定用户信息
+     * @param list
+     * @param userId
+     * @return
+     */
+    int delete(@Param("list") List<String> list, @Param("userId") String userId);
 }

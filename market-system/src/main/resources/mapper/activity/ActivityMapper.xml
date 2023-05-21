@@ -297,5 +297,22 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <select id="getAppActivityList" resultMap="baseMap">
         select <include refid="all_column"/> from T_ACTIVITY_INFO
         where DEL_FLAG = 0 and APPROVE_STATUS = '1' and STATUS = '1'
+        and SYSDATE &gt;= START_TIME and SYSDATE &lt; END_TIME
     </select>
+
+    <select id="getTimeOutList" resultMap="baseMap">
+        select <include refid="all_column"/> from T_ACTIVITY_INFO
+        where DEL_FLAG = 0 and STATUS in
+        <foreach collection="list" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </select>
+
+    <update id="updateInfoList">
+        update T_ACTIVITY_INFO set STATUS = #{status}, UPDATE_TIME = SYSDATE
+        where ID in
+        <foreach collection="list" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </update>
 </mapper>

@@ -129,3 +129,9 @@ xss:
   excludes: /system/notice
   # 匹配链接
   urlPatterns: /system/*,/monitor/*,/tool/*
+#quartz任务配置(多个task以‘\’隔开)
+quartz:
+  schedulerName: MARKET_SCHEDULE
+  threadCount: 10
+  threadNamePrefix: quartz_worker
+  tasks: CouponTimeOutTask:0/1 0 0/1 * * ?\ActivityTimeOutTask:0/1 0 0/1 * * ?\ActivityIngTask:0/1 0 0/1 * * ?

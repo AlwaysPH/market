@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.market.activity.mapper.ActivityCouponMapper;
 import com.market.activity.mapper.ActivityMapper;
+import com.market.activity.model.ActivityCouponInfo;
 import com.market.activity.model.ActivityInfo;
 import com.market.common.enums.*;
 import com.market.common.exception.ServiceException;
@@ -312,6 +313,11 @@ public class CouponServiceImpl implements CouponService {
         List<CouponInfo> data = couponMapper.getListData(list);
         if(CollectionUtils.isEmpty(data)){
             throw new ServiceException("未找到对应数据");
+        }
+        String couponId = list.get(0);
+        List<ActivityCouponInfo> dataList = activityCouponMapper.getDataList(null, couponId, null);
+        if(CollectionUtils.isNotEmpty(dataList)){
+            throw new ServiceException("当前优惠券有关联活动数据，不允许删除！");
         }
         int i = couponMapper.deleteCouponInfoByIds(list, SecurityUtils.getUserId());
         i += thresholdMapper.updateByCouponId(list, SecurityUtils.getUserId());

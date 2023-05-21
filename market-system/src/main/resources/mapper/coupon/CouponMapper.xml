@@ -505,7 +505,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
 
     <update id="updateUserCoupon">
-        update T_USER_COUPON set STATUS = #{status}, USE_TIME = #{useTime}
+        update T_USER_COUPON set STATUS = #{status}, USE_TIME = #{useTime}, UPDATE_TIME = SYSDATE
         <where>
             <if test="id != null and id != ''">
                 and ID = #{id}
@@ -526,5 +526,45 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                 and CARD_NUMBER = #{cardNumber}
             </if>
         </where>
+    </update>
+
+    <select id="getTimeOutList" resultType="com.market.coupon.model.CouponTimeOut">
+        SELECT
+            tuc.ID as userCouponId,
+            tuc.RECEIVE_TIME as receiveTime,
+            tac.EFFECT_TYPE as effectType,
+            tac.EFFECT_START_TIME as effectStartTime,
+            tac.EFFECT_END_TIME as effectEndTime,
+            tac.TAKE_DATE_NUM as takeDateNum,
+            tac.EFFECT_DATE_NUM as effectDateNum,
+            tai.START_TIME as startTime,
+            tai.END_TIME as endTime
+        FROM
+            T_USER_COUPON tuc
+            LEFT JOIN T_ACTIVITY_COUPON tac ON tuc.ACTIVITY_ID = tac.ACTIVITY_ID
+            LEFT JOIN T_ACTIVITY_INFO tai ON tai.ID = tac.ACTIVITY_ID
+            AND tai.DEL_FLAG = 0
+        WHERE
+            tuc.STATUS IN
+        <foreach collection="list" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+        GROUP BY
+            tuc.ID,
+            tuc.RECEIVE_TIME,
+            tac.EFFECT_TYPE,
+            tac.EFFECT_START_TIME,
+            tac.EFFECT_END_TIME,
+            tac.TAKE_DATE_NUM,
+            tac.EFFECT_DATE_NUM,
+            tai.START_TIME,
+            tai.END_TIME
+    </select>
+
+    <update id="updateTimeOut">
+        update T_USER_COUPON set STATUS = #{status}, UPDATE_TIME = SYSDATE where ID in
+        <foreach collection="list" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
     </update>
 </mapper>

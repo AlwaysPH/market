@@ -75,4 +75,12 @@
         select <include refid="all_column"/> from T_ACTIVITY_MERCHANT where DEL_FLAG = 0
         and ACTIVITY_ID = #{activityId}
     </select>
+
+    <update id="delete">
+        update T_ACTIVITY_MERCHANT set DEL_FLAG = '1', UPDATE_BY = #{userId}, UPDATE_TIME = SYSDATE
+        where ACTIVITY_ID in
+        <foreach collection="list" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </update>
 </mapper>

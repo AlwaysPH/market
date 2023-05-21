@@ -32,4 +32,12 @@ public interface MerchantMapper {
      * @return
      */
     List<MerchantInfo> getMerchantList(@Param("activityId") String activityId);
+
+    /**
+     * 删除活动关联商户信息
+     * @param list
+     * @param userId
+     * @return
+     */
+    int delete(@Param("list") List<String> list, @Param("userId") String userId);
 }

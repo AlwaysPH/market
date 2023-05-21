@@ -366,7 +366,15 @@ public class ActivityServiceImpl implements ActivityService {
         }
         List<String> list = Arrays.asList(ids);
         String userId = SecurityUtils.getUserId();
-        return mapper.deleteActivityInfoByIds(list, userId);
+        //删除活动信息
+        int i = mapper.deleteActivityInfoByIds(list, userId);
+        //删除活动关联优惠券信息
+        i += activityCouponMapper.delete(list, userId);
+        //删除活动关联商户信息
+        i += merchantMapper.delete(list, userId);
+        //删除活动指定用户信息
+        i += specialUserMapper.delete(list, userId);
+        return i;
     }
 
     /**
@@ -414,6 +422,15 @@ public class ActivityServiceImpl implements ActivityService {
         data.setAuditTime(new Date());
         data.setUpdateBy(SecurityUtils.getUserId());
         data.setUpdateTime(new Date());
+        //判断当前审核时间是否在活动时间之内
+        if(System.currentTimeMillis() >= data.getStartTime().getTime()
+            && System.currentTimeMillis() < data.getEndTime().getTime()){
+            data.setStatus(ActivityStatusEnum.ING.getCode());
+        }else if(System.currentTimeMillis() < data.getStartTime().getTime()){
+            data.setStatus(ActivityStatusEnum.NO_START.getCode());
+        }else if(System.currentTimeMillis() > data.getEndTime().getTime()){
+            data.setStatus(ActivityStatusEnum.FAILURE.getCode());
+        }
         return mapper.updateActivityInfo(data);
     }
 
@@ -834,15 +851,106 @@ public class ActivityServiceImpl implements ActivityService {
      */
     @Override
     public AjaxResult receiveCoupon(AppParams params) {
-        checkParams(params);
-        UserCouponInfo info = new UserCouponInfo();
-        BeanUtils.copyProperties(params, info);
-        info.setId(IdUtils.simpleUUID());
-        info.setIpAddress(IpUtils.getIpAddr());
-        info.setReceiveTime(new Date());
-        info.setStatus(CouponUseStatusEnum.UN_USED.getCode());
-        couponMapper.insertCouponUser(info);
+        ActivityInfo activityInfo = mapper.selectActivityInfoById(params.getActivityId());
+        checkActivity(activityInfo);
+        CouponInfo couponInfo = couponMapper.selectCouponInfoById(params.getCouponId());
+        if(Objects.isNull(couponInfo)){
+            throw new ServiceException("当前优惠券不存在");
+        }
+        params.setSendType(couponInfo.getSendType());
+        String deviceNo = params.getDeviceNo();
+        //每人限领
+        if(Objects.nonNull(couponInfo.getPersonLimit())){
+            params.setDeviceNo(null);
+            int num = couponMapper.getPersonReceiveNum(params);
+            if(num >= couponInfo.getPersonLimit()){
+                throw new ServiceException("当前优惠券已领取，请勿重新领取");
+            }
+        }
+        //每日限领
+        if(Objects.nonNull(couponInfo.getDateLimit())){
+            params.setReceiveTime(DateUtils.parseDateToStr(DateUtils.YYYY_MM_DD, new Date()));
+            int num = couponMapper.getPersonReceiveNum(params);
+            if(num >= couponInfo.getDateLimit()){
+                throw new ServiceException("当前优惠券已领取，请勿重新领取");
+            }
+        }
+        //每台每日限领
+        if(Objects.nonNull(couponInfo.getMachineLimit())){
+            params.setDeviceNo(deviceNo);
+            int num = couponMapper.getPersonReceiveNum(params);
+            if(num >= couponInfo.getMachineLimit()){
+                throw new ServiceException("当前优惠券已领取，请勿重新领取");
+            }
+        }
+        List<ActivityCouponInfo> dataList = activityCouponMapper.getDataList(params.getActivityId(), params.getCouponId(), null);
+        if(CollectionUtils.isEmpty(dataList)){
+            throw new ServiceException("当前优惠券不属于当前活动，操作失败");
+        }
+        ActivityCouponInfo info = dataList.get(0);
+        //领取门槛为指定用户
+        if(StringUtils.equalsIgnoreCase(info.getReceiveType(), ReceiveTypeEnum.SPECIFY_USER.getCode())){
+            int num = specialUserMapper.getSpecialData(params);
+            if(num <= 0){
+                throw new ServiceException("当前用户不在活动范围内，操作失败");
+            }
+        }
+        //判断优惠券库存
+        List<GrantInfo> grantInfos = grantMapper.getDataList(params.getActivityId(), params.getCouponId());
+        if(CollectionUtils.isNotEmpty(grantInfos)){
+            GrantInfo grantInfo = grantInfos.get(0);
+            AppParams param = new AppParams();
+            param.setCouponId(params.getCouponId());
+            int num = couponMapper.getPersonReceiveNum(param);
+            if(num >= grantInfo.getGrantNum().intValue()){
+                throw new ServiceException("当前优惠券库存不足，操作失败");
+            }
+        }
+        Date date = new Date();
+        UserCouponInfo data = new UserCouponInfo();
+        BeanUtils.copyProperties(params, data);
+        data.setId(IdUtils.simpleUUID());
+        data.setIpAddress(IpUtils.getIpAddr());
+        data.setReceiveTime(date);
+        data.setStatus(judgeCouponStatus(activityInfo, info, date));
+        couponMapper.insertCouponUser(data);
         return AjaxResult.success();
+    }
+
+    /**
+     * 判断用户领取优惠券使用状态
+     * @param activityInfo
+     * @param info
+     * @param date
+     * @return
+     */
+    private String judgeCouponStatus(ActivityInfo activityInfo, ActivityCouponInfo info,
+                                     Date date) {
+        if(System.currentTimeMillis() >= activityInfo.getStartTime().getTime()
+            && System.currentTimeMillis() < activityInfo.getEndTime().getTime()){
+            if (com.market.common.utils.StringUtils.equalsIgnoreCase(info.getEffectType(), CouponEffectTypeEnum.FIX.getCode())) {
+                /**固定日期**/
+                if(System.currentTimeMillis() >= info.getEffectStartTime().getTime()
+                    && System.currentTimeMillis() < info.getEffectEndTime().getTime()){
+                    return CouponUseStatusEnum.UN_USED.getCode();
+                }else {
+                    return CouponUseStatusEnum.TIME_OUT.getCode();
+                }
+            }else if(com.market.common.utils.StringUtils.equalsIgnoreCase(info.getEffectType(), CouponEffectTypeEnum.ACC.getCode())){
+                /**累计日期**/
+                Date afterDate = DateUtils.daysAgoOrAfterToDate(date, info.getEffectDateNum() + info.getTakeDateNum());
+                if(System.currentTimeMillis() < afterDate.getTime()){
+                    return CouponUseStatusEnum.UN_USED.getCode();
+                }else {
+                    return CouponUseStatusEnum.TIME_OUT.getCode();
+                }
+            }
+        }else if(System.currentTimeMillis() >= activityInfo.getEndTime().getTime()){
+            return CouponUseStatusEnum.TIME_OUT.getCode();
+        }else if(System.currentTimeMillis() < activityInfo.getStartTime().getTime()){
+            return CouponUseStatusEnum.UN_USED.getCode();
+        }
+        return CouponUseStatusEnum.UN_USED.getCode();
     }
 
     /**
@@ -903,64 +1011,6 @@ public class ActivityServiceImpl implements ActivityService {
         }
         if(activityInfo.getEndTime().getTime() < System.currentTimeMillis()){
             throw new ServiceException("当前活动已结束");
-        }
-    }
-
-    private void checkParams(AppParams params) {
-        ActivityInfo activityInfo = mapper.selectActivityInfoById(params.getActivityId());
-        checkActivity(activityInfo);
-        CouponInfo couponInfo = couponMapper.selectCouponInfoById(params.getCouponId());
-        if(Objects.isNull(couponInfo)){
-            throw new ServiceException("当前优惠券不存在");
-        }
-        params.setSendType(couponInfo.getSendType());
-        String deviceNo = params.getDeviceNo();
-        //每人限领
-        if(Objects.nonNull(couponInfo.getPersonLimit())){
-            params.setDeviceNo(null);
-            int num = couponMapper.getPersonReceiveNum(params);
-            if(num >= couponInfo.getPersonLimit()){
-                throw new ServiceException("当前优惠券已领取，请勿重新领取");
-            }
-        }
-        //每日限领
-        if(Objects.nonNull(couponInfo.getDateLimit())){
-            params.setReceiveTime(DateUtils.parseDateToStr(DateUtils.YYYY_MM_DD, new Date()));
-            int num = couponMapper.getPersonReceiveNum(params);
-            if(num >= couponInfo.getDateLimit()){
-                throw new ServiceException("当前优惠券已领取，请勿重新领取");
-            }
-        }
-        //每台每日限领
-        if(Objects.nonNull(couponInfo.getMachineLimit())){
-            params.setDeviceNo(deviceNo);
-            int num = couponMapper.getPersonReceiveNum(params);
-            if(num >= couponInfo.getMachineLimit()){
-                throw new ServiceException("当前优惠券已领取，请勿重新领取");
-            }
-        }
-        List<ActivityCouponInfo> dataList = activityCouponMapper.getDataList(params.getActivityId(), params.getCouponId(), null);
-        if(CollectionUtils.isEmpty(dataList)){
-            throw new ServiceException("当前优惠券不属于当前活动，操作失败");
-        }
-        ActivityCouponInfo info = dataList.get(0);
-        //领取门槛为指定用户
-        if(StringUtils.equalsIgnoreCase(info.getReceiveType(), ReceiveTypeEnum.SPECIFY_USER.getCode())){
-            int num = specialUserMapper.getSpecialData(params);
-            if(num <= 0){
-                throw new ServiceException("当前用户不在活动范围内，操作失败");
-            }
-        }
-        //判断优惠券库存
-        List<GrantInfo> grantInfos = grantMapper.getDataList(params.getActivityId(), params.getCouponId());
-        if(CollectionUtils.isNotEmpty(grantInfos)){
-            GrantInfo grantInfo = grantInfos.get(0);
-            AppParams param = new AppParams();
-            param.setCouponId(params.getCouponId());
-            int num = couponMapper.getPersonReceiveNum(param);
-            if(num >= grantInfo.getGrantNum().intValue()){
-                throw new ServiceException("当前优惠券库存不足，操作失败");
-            }
         }
     }
 

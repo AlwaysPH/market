@@ -2,6 +2,8 @@ package com.market.coupon.model;
 
 import lombok.Data;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
@@ -18,42 +20,56 @@ public class AppParams implements Serializable {
      * 优惠券id
      */
     @NotNull(message = "优惠券id不能为空")
+    @NotBlank(message = "优惠券id不能为空")
+    @NotEmpty(message = "优惠券id不能为空")
     private String couponId;
 
     /**
      * 活动id
      */
     @NotNull(message = "活动id不能为空")
+    @NotBlank(message = "活动id不能为空")
+    @NotEmpty(message = "活动id不能为空")
     private String activityId;
 
     /**
      * 用户编号
      */
     @NotNull(message = "用户编号不能为空")
+    @NotBlank(message = "用户编号不能为空")
+    @NotEmpty(message = "用户编号不能为空")
     private String userNo;
 
     /**
      * 用户手机号
      */
     @NotNull(message = "用户手机号不能为空")
+    @NotBlank(message = "用户手机号不能为空")
+    @NotEmpty(message = "用户手机号不能为空")
     private String phoneNumber;
 
     /**
      * APP账号
      */
     @NotNull(message = "APP账号不能为空")
+    @NotBlank(message = "APP账号不能为空")
+    @NotEmpty(message = "APP账号不能为空")
     private String appAccount;
 
     /**
      * 卡号
      */
     @NotNull(message = "卡号不能为空")
+    @NotBlank(message = "卡号不能为空")
+    @NotEmpty(message = "卡号不能为空")
     private String cardNumber;
 
     /**
      * 设备号
      */
     @NotNull(message = "设备号不能为空")
+    @NotBlank(message = "设备号不能为空")
+    @NotEmpty(message = "设备号不能为空")
     private String deviceNo;
 
     /**

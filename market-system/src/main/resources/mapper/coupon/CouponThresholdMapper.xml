@@ -197,6 +197,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <select id="getAppActivityCouponList" resultType="com.market.coupon.model.CouponThreshold">
         SELECT
+            tai.ID as activityId,
             tci.ID as couponId,
             tci.COUPON_TYPE as couponType,
             tci.COUPON_NAME as couponName,

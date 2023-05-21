@@ -2,10 +2,14 @@ package com.market.framework.web.service;
 
 import javax.annotation.Resource;
 
+import com.market.common.utils.sign.RSAUtil;
 import com.market.framework.manager.AsyncManager;
 import com.market.framework.manager.factory.AsyncFactory;
 import com.market.framework.security.context.AuthenticationContextHolder;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -36,6 +40,7 @@ import com.market.system.service.ISysUserService;
  * @author ph
  */
 @Component
+@Slf4j
 public class SysLoginService {
     @Autowired
     private TokenService tokenService;
@@ -69,6 +74,12 @@ public class SysLoginService {
         // 用户验证
         Authentication authentication = null;
         try {
+            //秘密解密
+            password = RSAUtil.decrypt(password);
+            if(StringUtils.isEmpty(password)){
+                AsyncManager.me().execute(AsyncFactory.recordLogininfor(username, Constants.LOGIN_FAIL, MessageUtils.message("user.password.not.match")));
+                throw new UserPasswordNotMatchException();
+            }
             UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, password);
             AuthenticationContextHolder.setContext(authenticationToken);
             // 该方法会去调用UserDetailsServiceImpl.loadUserByUsername
@@ -89,6 +100,24 @@ public class SysLoginService {
         recordLoginInfo(loginUser.getUserId());
         // 生成token
         return tokenService.createToken(loginUser);
+    }
+
+    private String decrypt(String password) {
+        return null;
+    }
+
+    private boolean isPass(String username, String password, String uuid, String noStr) {
+        if(StringUtils.isEmpty(uuid) || StringUtils.isEmpty(noStr)){
+            return false;
+        }
+        String time = DateUtils.getYYYYMMDDDate();
+        StringBuilder sb = new StringBuilder();
+        sb.append(username).append(password).append(time).append(noStr);
+        String code = DigestUtils.md5Hex(sb.toString());
+        if(StringUtils.equals(uuid, code)){
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -129,8 +158,7 @@ public class SysLoginService {
             throw new UserNotExistsException();
         }
         // 密码如果不在指定范围内 错误
-        if (password.length() < UserConstants.PASSWORD_MIN_LENGTH
-                || password.length() > UserConstants.PASSWORD_MAX_LENGTH) {
+        if (password.length() < UserConstants.PASSWORD_MIN_LENGTH) {
             AsyncManager.me().execute(AsyncFactory.recordLogininfor(username, Constants.LOGIN_FAIL, MessageUtils.message("user.password.not.match")));
             throw new UserPasswordNotMatchException();
         }

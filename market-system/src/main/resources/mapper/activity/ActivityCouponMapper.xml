@@ -184,4 +184,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </if>
     </select>
 
+    <update id="delete">
+        update T_ACTIVITY_COUPON set DEL_FLAG = '1', UPDATE_BY = #{userId}, UPDATE_TIME = SYSDATE
+        where ACTIVITY_ID in
+        <foreach collection="list" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </update>
+
 </mapper>

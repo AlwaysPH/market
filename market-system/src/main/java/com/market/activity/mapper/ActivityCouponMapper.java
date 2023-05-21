@@ -69,4 +69,12 @@ public interface ActivityCouponMapper {
      * @return
      */
     List<ActivityCouponInfo> getCouponDataList(@Param("activityId") String activityId);
+
+    /**
+     * 删除活动关联优惠券信息
+     * @param list
+     * @param userId
+     * @return
+     */
+    int delete(@Param("list") List<String> list, @Param("userId") String userId);
 }

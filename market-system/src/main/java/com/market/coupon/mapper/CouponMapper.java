@@ -166,4 +166,18 @@ import java.util.List;
      * @return
      */
     int updateUserCoupon(UserCouponInfo info);
+
+    /**
+     * 获取还未使用的优惠券列表
+     * @return
+     * @param status
+     */
+    List<CouponTimeOut> getTimeOutList(@Param("list") List<String> status);
+
+    /**
+     * 更新已失效的优惠券
+     * @param list
+     * @param status
+     */
+    void updateTimeOut(@Param("list") List<String> list, @Param("status") String status);
 }

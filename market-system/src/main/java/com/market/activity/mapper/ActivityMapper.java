@@ -74,4 +74,17 @@ public interface ActivityMapper {
      */
     List<ActivityInfo> getAppActivityList();
 
+    /**
+     * 获取未开始和进行中的活动列表
+     * @return
+     * @param status
+     */
+    List<ActivityInfo> getTimeOutList(@Param("list") List<String> status);
+
+    /**
+     * 批量更新
+     * @param idList
+     * @param code
+     */
+    void updateInfoList(@Param("list") List<String> idList, @Param("status") String code);
 }
