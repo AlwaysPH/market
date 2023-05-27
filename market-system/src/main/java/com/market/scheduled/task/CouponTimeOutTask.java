@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 用户优惠券失效任务
@@ -51,7 +52,7 @@ public class CouponTimeOutTask implements QuartzScheduleTask {
     public void execute() {
         boolean lock = false;
         try {
-            lock = redisTemplate.opsForValue().setIfAbsent(KEY, LOCK);
+            lock = redisTemplate.opsForValue().setIfAbsent(KEY, LOCK, 30, TimeUnit.SECONDS);
             log.info("执行用户优惠券失效任务是否获取到锁:" + lock);
             if(lock){
                 log.info("开始用户优惠券失效任务......");
@@ -70,7 +71,7 @@ public class CouponTimeOutTask implements QuartzScheduleTask {
     }
 
     private void executeTask() {
-        //获取还未使用的优惠券列表
+        //获取未使用和未生效的优惠券列表
         List<CouponTimeOut> list = couponMapper.getTimeOutList(STATUS);
         if(CollectionUtils.isEmpty(list)){
             log.info("无未使用和未生效的优惠券数据");

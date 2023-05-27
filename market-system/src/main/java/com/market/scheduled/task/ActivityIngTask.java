@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 活动开始任务
@@ -46,7 +47,7 @@ public class ActivityIngTask implements QuartzScheduleTask {
     public void execute() {
         boolean lock = false;
         try {
-            lock = redisTemplate.opsForValue().setIfAbsent(KEY, LOCK);
+            lock = redisTemplate.opsForValue().setIfAbsent(KEY, LOCK, 30, TimeUnit.SECONDS);
             log.info("执行活动开始任务是否获取到锁:" + lock);
             if(lock){
                 log.info("开始活动开始任务......");

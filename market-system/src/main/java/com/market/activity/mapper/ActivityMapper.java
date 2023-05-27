@@ -71,8 +71,9 @@ public interface ActivityMapper {
     /**
      * 获取APP的活动列表
      * @return
+     * @param typeList
      */
-    List<ActivityInfo> getAppActivityList();
+    List<ActivityInfo> getAppActivityList(@Param("list") List<String> typeList);
 
     /**
      * 获取未开始和进行中的活动列表

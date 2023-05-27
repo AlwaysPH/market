@@ -25,12 +25,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="personLimit"    column="PERSON_LIMIT"    />
         <result property="dateLimit"    column="DATE_LIMIT"    />
         <result property="machineLimit"    column="MACHINE_LIMIT"    />
+        <result property="channelType"    column="CHANNEL_TYPE"    />
     </resultMap>
 
     <sql id="all_column">
         ID, BUSINESS_TYPE, COUPON_TYPE, COUPON_ADD, COUPON_NAME, COUPON_CODE, COUPON_PHOTO,
         USE_DESC, VER_CHANNEL, PAY_TYPE, CREATE_BY, CREATE_TIME, UPDATE_BY, UPDATE_TIME, DEL_FLAG,
-        SEND_TYPE, CONDITION_DESC, PERSON_LIMIT, DATE_LIMIT, MACHINE_LIMIT
+        SEND_TYPE, CONDITION_DESC, PERSON_LIMIT, DATE_LIMIT, MACHINE_LIMIT, CHANNEL_TYPE
     </sql>
 
     <select id="selectCouponInfoList" resultMap="baseMap">
@@ -78,6 +79,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="personLimit != null">PERSON_LIMIT,</if>
             <if test="dateLimit != null">DATE_LIMIT,</if>
             <if test="machineLimit != null">MACHINE_LIMIT,</if>
+            <if test="channelType != null">CHANNEL_TYPE,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="id != null">#{id},</if>
@@ -100,6 +102,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="personLimit != null">#{personLimit},</if>
             <if test="dateLimit != null">#{dateLimit},</if>
             <if test="machineLimit != null">#{machineLimit},</if>
+            <if test="channelType != null">#{channelType},</if>
          </trim>
     </insert>
 
@@ -122,6 +125,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="personLimit != null">PERSON_LIMIT = #{personLimit},</if>
             <if test="dateLimit != null">DATE_LIMIT = #{dateLimit},</if>
             <if test="machineLimit != null">MACHINE_LIMIT = #{machineLimit},</if>
+            <if test="channelType != null">CHANNEL_TYPE = #{channelType},</if>
             UPDATE_TIME = SYSDATE
         </trim>
         where ID = #{id}
@@ -237,11 +241,17 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             count( * ) AS receiveNum
         FROM
             T_USER_COUPON
-        WHERE
-            COUPON_ID in
-            <foreach collection="list" item="item" open="(" close=")" separator=",">
-                #{item}
-            </foreach>
+        <where>
+            <if test="list != null and list.size() > 0">
+                and COUPON_ID in
+                <foreach collection="list" item="item" open="(" close=")" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="activityId != null and activityId != ''">
+                and ACTIVITY_ID = #{activityId}
+            </if>
+        </where>
         GROUP BY
             COUPON_ID
     </select>
@@ -293,16 +303,19 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             tci.COUPON_CODE AS couponCode,
             tai.ACTIVITY_NAME AS activityName,
             tai.BUDGET AS budget,
+            tai.ID AS activityId,
             NVL( sum( tgi.GRANT_NUM ), 0 ) AS sendCouponNum,
             count( tuc.USER_NO ) AS receiveCouponNum
         FROM
-            T_COUPON_INFO tci
-            LEFT JOIN T_ACTIVITY_COUPON tac ON tci.ID = tac.COUPON_ID
-            AND tac.DEL_FLAG = 0
-            LEFT JOIN T_ACTIVITY_INFO tai ON tai.ID = tac.ACTIVITY_ID
-            AND tai.DEL_FLAG = 0
-            LEFT JOIN T_GRANT_INFO tgi ON tgi.COUPON_ID = tci.ID
-            LEFT JOIN T_USER_COUPON tuc ON tuc.COUPON_ID = tci.ID
+        T_COUPON_INFO tci
+        LEFT JOIN T_ACTIVITY_COUPON tac ON tci.ID = tac.COUPON_ID
+        AND tac.DEL_FLAG = 0
+        LEFT JOIN T_ACTIVITY_INFO tai ON tai.ID = tac.ACTIVITY_ID
+        AND tai.DEL_FLAG = 0
+        LEFT JOIN T_GRANT_INFO tgi ON tgi.COUPON_ID = tci.ID
+        AND tgi.ACTIVITY_ID = tai.ID
+        LEFT JOIN T_USER_COUPON tuc ON tuc.COUPON_ID = tci.ID
+        AND tai.ID = tuc.ACTIVITY_ID
         where tci.DEL_FLAG = 0
         <if test="activityName != null and activityName != ''">
             and tai.ACTIVITY_NAME like concat(concat('%', #{activityName}), '%')
@@ -326,22 +339,30 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             tci.COUPON_NAME,
             tci.COUPON_CODE,
             tai.ACTIVITY_NAME,
-            tai.BUDGET
+            tai.BUDGET,
+            tai.ID
     </select>
 
     <select id="getUseNumByCouponIds" resultType="com.market.index.model.SummaryInfo">
         select
         count( * ) as useNum,
-        COUPON_ID as couponId
+        COUPON_ID as couponId,
+        ACTIVITY_ID as activityId
         from T_USER_COUPON where STATUS = '2'
-        <if test="idList != null and idList.size() > 0">
+        <if test="couponIdList != null and couponIdList.size() > 0">
             and COUPON_ID in
-            <foreach collection="idList" item="item" open="(" close=")" separator=",">
+            <foreach collection="couponIdList" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+        <if test="activityIdList != null and activityIdList.size() > 0">
+            and ACTIVITY_ID in
+            <foreach collection="activityIdList" item="item" open="(" close=")" separator=",">
                 #{item}
             </foreach>
         </if>
         GROUP BY
-        COUPON_ID
+        COUPON_ID, ACTIVITY_ID
     </select>
 
     <select id="getActivityNum" resultType="int">
@@ -354,7 +375,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             LEFT JOIN T_ACTIVITY_INFO tai ON tai.ID = tac.ACTIVITY_ID
             AND tai.DEL_FLAG = 0
         WHERE
-            tci.DEL_FLAG = 0
+            tci.DEL_FLAG = 0 and tai.APPROVE_STATUS = '1'
             and tci.ID = #{id}
     </select>
 
@@ -364,6 +385,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         FROM
             T_USER_COUPON
         <where>
+            <if test="activityId != null and activityId != ''">
+                and ACTIVITY_ID = #{activityId}
+            </if>
             <if test="couponId != null and couponId != ''">
                 and COUPON_ID = #{couponId}
             </if>
@@ -397,6 +421,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="writeOffCode != null">WRITE_OFF_CODE,</if>
             <if test="linkUrl != null">LINK_URL,</if>
             <if test="sendType != null">SEND_TYPE,</if>
+            <if test="channelType != null">CHANNEL_TYPE,</if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="id != null">#{id},</if>
@@ -414,11 +439,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="writeOffCode != null">#{writeOffCode},</if>
             <if test="linkUrl != null">#{linkUrl},</if>
             <if test="sendType != null">#{sendType},</if>
+            <if test="channelType != null">#{channelType},</if>
         </trim>
     </insert>
 
     <select id="getUserCouponList" resultType="com.market.coupon.model.CouponThreshold">
         SELECT
+            tuc.ID as userCouponId,
             tci.ID as couponId,
             tai.ID as activityId,
             tci.COUPON_NAME as couponName,
@@ -446,7 +473,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             tct.SALE_NUM,
             tct.UPPER_LIMIT_FLAG,
             tct.UPPER_LIMIT_AMOUNT,
-            tct.MONEY,
+            tct.MONEY as faceMoney,
             tct.ORDER_AMOUNT,
             tct.PAY_AMOUNT
         FROM
@@ -461,6 +488,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             LEFT JOIN T_COUPON_THRESHOLD tct ON tct.COUPON_ID = tuc.COUPON_ID
             AND tct.DEL_FLAG = '0'
         <where>
+            <if test="userCouponId != null and userCouponId != ''">
+                and tuc.ID = #{userCouponId}
+            </if>
             <if test="couponId != null and couponId != ''">
                 and tuc.COUPON_ID = #{couponId}
             </if>
@@ -486,6 +516,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         LINK_URL, SEND_TYPE, USE_TIME
         from T_USER_COUPON
         <where>
+            <if test="userCouponId != null and userCouponId != ''">
+                and ID = #{userCouponId}
+            </if>
             <if test="activityId != null and activityId != ''">
                 and ACTIVITY_ID = #{activityId}
             </if>
@@ -567,4 +600,107 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{item}
         </foreach>
     </update>
+
+    <insert id="insertCouponUseDetail">
+        insert into T_COUPON_USE_DETAIL(ID, ACTIVITY_ID,  COUPON_ID, USER_COUPON_ID, PHONE_NUMBER, ORDER_AMOUNT,
+        ORDER_NO, DIS_AMOUNT, TRANS_TIME, USER_TYPE, CREATE_TIME, CHANNEL_TYPE) values (#{id},
+        #{activityId}, #{couponId}, #{userCouponId}, #{phoneNumber}, #{orderAmount}, #{orderNo}, #{disAmount},
+        #{transTime}, #{userType}, #{createTime}, #{channelType})
+    </insert>
+
+    <select id="getCouponUseDetail" resultType="com.market.coupon.model.CouponUseEntity">
+        SELECT
+            NVL( sum( ORDER_AMOUNT ), 0 ) AS orderAmount,
+            NVL( sum( DIS_AMOUNT ), 0 ) AS disAmount,
+            count( ORDER_NO ) AS orderNum
+        FROM
+            T_COUPON_USE_DETAIL
+        <where>
+            <if test="beginTime != null and beginTime != '' and endTime != null and endTime != ''">
+                and TO_CHAR( TRANS_TIME, 'yyyy-mm-dd hh24:mi:ss' ) BETWEEN #{beginTime}
+                AND #{endTime}
+            </if>
+        </where>
+    </select>
+
+    <select id="getNewNum" resultType="int">
+        SELECT
+            count( * )
+        FROM
+            ( SELECT PHONE_NUMBER FROM
+                T_COUPON_USE_DETAIL
+                where USER_TYPE = '1'
+                    <if test="beginTime != null and beginTime != '' and endTime != null and endTime != ''">
+                        and TO_CHAR( TRANS_TIME, 'yyyy-mm-dd hh24:mi:ss' )
+                        BETWEEN #{beginTime} AND #{endTime}
+                    </if>
+                    <if test="couponIdList != null and couponIdList != ''">
+                        and COUPON_ID in
+                        <foreach collection="couponIdList" item="item" open="(" close=")" separator=",">
+                            #{item}
+                        </foreach>
+                    </if>
+                    <if test="activityIdList != null and activityIdList.size() > 0">
+                        and ACTIVITY_ID in
+                        <foreach collection="activityIdList" item="item" open="(" close=")" separator=",">
+                            #{item}
+                        </foreach>
+                    </if>
+                GROUP BY PHONE_NUMBER )
+    </select>
+
+    <select id="getCouponUseDetailList" resultType="com.market.coupon.model.CouponUseEntity">
+        SELECT
+            NVL( sum( ORDER_AMOUNT ), 0 ) AS orderAmount,
+            NVL( sum( DIS_AMOUNT ), 0 ) AS disAmount,
+            count( ORDER_NO ) AS orderNum,
+            COUPON_ID as couponId
+            <if test="activityIdList != null and activityIdList.size() > 0">
+                ,ACTIVITY_ID
+            </if>
+        FROM
+            T_COUPON_USE_DETAIL
+        <where>
+            <if test="couponIdList != null and couponIdList != ''">
+                and COUPON_ID in
+                <foreach collection="couponIdList" item="item" open="(" close=")" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="activityIdList != null and activityIdList.size() > 0">
+                and ACTIVITY_ID in
+                <foreach collection="activityIdList" item="item" open="(" close=")" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+        GROUP BY
+            COUPON_ID
+        <if test="activityIdList != null and activityIdList.size() > 0">
+            ,ACTIVITY_ID
+        </if>
+    </select>
+
+    <select id="getNewNumByGroup" resultType="com.market.coupon.model.CouponUseEntity">
+       SELECT PHONE_NUMBER, COUPON_ID, ACTIVITY_ID FROM
+        T_COUPON_USE_DETAIL
+        where USER_TYPE = '1'
+        <if test="beginTime != null and beginTime != '' and endTime != null and endTime != ''">
+            and TO_CHAR( TRANS_TIME, 'yyyy-mm-dd hh24:mi:ss' )
+            BETWEEN #{beginTime} AND #{endTime}
+        </if>
+        <if test="couponIdList != null and couponIdList != ''">
+            and COUPON_ID in
+            <foreach collection="couponIdList" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+        <if test="activityIdList != null and activityIdList.size() > 0">
+            and ACTIVITY_ID in
+            <foreach collection="activityIdList" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+        GROUP BY PHONE_NUMBER, COUPON_ID, ACTIVITY_ID
+    </select>
 </mapper>

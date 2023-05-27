@@ -3,15 +3,14 @@ package com.market.coupon.model;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.market.common.annotation.Excel;
 import com.market.common.core.domain.BaseEntity;
 import lombok.Data;
 
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import javax.validation.constraints.NotNull;
 
 /**
  * 优惠券使用门槛信息对象 t_coupon_threshold
@@ -213,4 +212,45 @@ public class CouponThreshold extends BaseEntity implements Serializable {
     @Transient
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date useTime;
+
+    /**
+     * 发放数量
+     */
+    @Transient
+    private Integer grantNum;
+
+    /**
+     * 领取数量
+     */
+    @Transient
+    private Integer receiveNum;
+
+    /**
+     * 剩余数量
+     */
+    @Transient
+    private Integer surplusNum;
+
+    /**
+     * 库存不足标识   0   否   1  是
+     */
+    @Transient
+    private Integer fullFlag;
+
+    /**
+     * 阶梯满减券使用门槛
+     */
+    @Transient
+    private List<CouponThreshold> ladderList;
+
+    /**
+     * 用户领取优惠券表id
+     */
+    private String userCouponId;
+
+    /**
+     *优惠券渠道  1 潇湘支付优惠券
+     */
+    @Transient
+    private String channelType;
 }

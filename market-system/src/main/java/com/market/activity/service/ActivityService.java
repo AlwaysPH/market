@@ -157,8 +157,9 @@ public interface ActivityService {
     /**
      * 获取APP的活动列表
      * @return
+     * @param params
      */
-    List<ActivityInfo> getAppActivityList();
+    List<ActivityInfo> getAppActivityList(AppParams params);
 
     /**
      * 获取APP的活动关联优惠券列表

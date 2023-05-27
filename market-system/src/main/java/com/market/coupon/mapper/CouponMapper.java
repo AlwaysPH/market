@@ -78,9 +78,10 @@ import java.util.List;
     /**
      * 获取优惠券领取数据
      * @param idList
+     * @param activityId
      * @return
      */
-    List<UserCouponInfo> getReceiveList(@Param("list") List<String> idList);
+    List<UserCouponInfo> getReceiveList(@Param("list") List<String> idList, @Param("activityId") String activityId);
 
     /**
      * 获取优惠券关联活动数据
@@ -158,7 +159,7 @@ import java.util.List;
      * @param params
      * @return
      */
-    UserCouponInfo getUserCouponData(AppParams params);
+    UserCouponInfo getUserCouponData(UseCouponParam params);
 
     /**
      * 更新用户关联优惠券
@@ -180,4 +181,39 @@ import java.util.List;
      * @param status
      */
     void updateTimeOut(@Param("list") List<String> list, @Param("status") String status);
+
+    /**
+     * 记录优惠券使用详情信息
+     * @param entity
+     * @return
+     */
+    int insertCouponUseDetail(CouponUseEntity entity);
+
+    /**
+     * 获取优惠券使用详情
+     * @param param
+     * @return
+     */
+    CouponUseEntity getCouponUseDetail(IndexParam param);
+
+    /**
+     * 获取新用户数量
+     * @param param
+     * @return
+     */
+    int getNewNum(IndexParam param);
+
+    /**
+     * 获取优惠券使用订单数据
+     * @param param
+     * @return
+     */
+    List<CouponUseEntity> getCouponUseDetailList(IndexParam param);
+
+    /**
+     * 获取优惠券拉新数
+     * @param param
+     * @return
+     */
+    List<CouponUseEntity> getNewNumByGroup(IndexParam param);
 }

@@ -6,6 +6,7 @@ import lombok.Data;
 
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -113,4 +114,9 @@ public class UserCouponInfo implements Serializable {
      */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date useTime;
+
+    /**
+     *优惠券渠道  1 潇湘支付优惠券
+     */
+    private String channelType;
 }

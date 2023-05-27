@@ -134,4 +134,4 @@ quartz:
   schedulerName: MARKET_SCHEDULE
   threadCount: 10
   threadNamePrefix: quartz_worker
-  tasks: CouponTimeOutTask:0/1 0 0/1 * * ?\ActivityTimeOutTask:0/1 0 0/1 * * ?\ActivityIngTask:0/1 0 0/1 * * ?
+  tasks: CouponIngTask:0/1 0 0/1 * * ?\CouponTimeOutTask:0/1 0 0/1 * * ?\ActivityIngTask:0/1 0 0/1 * * ?\ActivityTimeOutTask:0/1 0 0/1 * * ?

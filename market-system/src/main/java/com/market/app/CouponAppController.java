@@ -5,8 +5,10 @@ import com.market.common.annotation.RepeatSubmit;
 import com.market.common.core.controller.BaseController;
 import com.market.common.core.domain.AjaxResult;
 import com.market.common.core.page.TableDataInfo;
+import com.market.common.utils.ValidatorUtil;
 import com.market.coupon.model.AppParams;
 import com.market.coupon.model.CouponThreshold;
+import com.market.coupon.model.UseCouponParam;
 import com.market.coupon.service.CouponService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,7 +39,7 @@ public class CouponAppController extends BaseController {
     public TableDataInfo getUserCouponList(@RequestBody AppParams params){
         startPage();
         List<CouponThreshold> list = couponService.getUserCouponList(params);
-        return getDataTable(list);
+        return getDataToTable(list);
     }
 
     /**
@@ -46,7 +48,28 @@ public class CouponAppController extends BaseController {
      */
     @RepeatSubmit
     @PostMapping("/useCoupon")
-    public AjaxResult useCoupon(@RequestBody AppParams params){
+    public AjaxResult useCoupon(@RequestBody UseCouponParam params){
+        ValidatorUtil.validateEntity(params);
         return AjaxResult.success(couponService.useCoupon(params));
+    }
+
+    /**
+     * 获取最优支付的优惠券
+     * @return
+     */
+    @RepeatSubmit
+    @PostMapping("/getOptimalCoupon")
+    public AjaxResult getOptimalCoupon(@RequestBody AppParams params){
+        return AjaxResult.success(couponService.getOptimalCoupon(params));
+    }
+
+    /**
+     * 获取优惠券详细信息
+     * @return
+     */
+    @RepeatSubmit
+    @PostMapping("/getCouponDetail")
+    public AjaxResult getCouponDetail(@RequestBody AppParams params){
+        return AjaxResult.success(couponService.getCouponDetail(params));
     }
 }

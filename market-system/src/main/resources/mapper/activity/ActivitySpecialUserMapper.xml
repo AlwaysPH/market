@@ -18,18 +18,19 @@
         <result property="updateBy"    column="UPDATE_BY"    />
         <result property="updateTime"    column="UPDATE_TIME"    />
         <result property="delFlag"    column="DEL_FLAG"    />
+        <result property="phoneNumber"    column="PHONE_NUMBER"    />
     </resultMap>
 
     <sql id="all_column">
         ID, ACTIVITY_ID, CARD_NO, CARD_NAME, APP_USER_ID,
         APP_ACCOUNT, COMPANY_USER_NAME, CARD_SURFACE_NAME,
-        CREATE_BY, CREATE_TIME, UPDATE_BY, UPDATE_TIME, DEL_FLAG
+        CREATE_BY, CREATE_TIME, UPDATE_BY, UPDATE_TIME, DEL_FLAG, PHONE_NUMBER
     </sql>
 
     <insert id="insertData" parameterType="java.util.List" useGeneratedKeys="false">
         insert into T_ACTIVITY_SPECIAL_USER(ID, ACTIVITY_ID, CARD_NO, CARD_NAME, APP_USER_ID,
         APP_ACCOUNT, COMPANY_USER_NAME, CARD_SURFACE_NAME,
-        CREATE_BY, CREATE_TIME, UPDATE_BY, UPDATE_TIME, DEL_FLAG)
+        CREATE_BY, CREATE_TIME, UPDATE_BY, UPDATE_TIME, DEL_FLAG, PHONE_NUMBER)
         <foreach item="item" index="index" collection="list" separator=" union all ">
             select
             #{item.id,jdbcType=VARCHAR},
@@ -44,7 +45,8 @@
             #{item.createTime,jdbcType=DATE},
             #{item.updateBy,jdbcType=VARCHAR},
             #{item.updateTime,jdbcType=DATE},
-            #{item.delFlag,jdbcType=CHAR}
+            #{item.delFlag,jdbcType=CHAR},
+            #{item.phoneNumber,jdbcType=VARCHAR}
             from dual
         </foreach>
     </insert>
@@ -60,6 +62,9 @@
         <if test="cardNumber != null and cardNumber != ''">
             and CARD_NO = #{cardNumber}
         </if>
+        <if test="phoneNumber != null and phoneNumber != ''">
+            and PHONE_NUMBER = #{phoneNumber}
+        </if>
     </select>
 
     <update id="delete">
@@ -69,4 +74,39 @@
             #{item}
         </foreach>
     </update>
+
+    <select id="getSpecialDataByPhone" resultType="com.market.activity.model.ActivityInfo">
+        SELECT
+        tai.ID,
+        tai.ACTIVITY_ABB,
+        tai.ACTIVITY_NAME,
+        tai.START_TIME,
+        tai.END_TIME,
+        tai.XIAOXIANG_PAY_NUM,
+        tai.ORG_NAME,
+        tai.ORG_PAY_NUM,
+        tai.MERCHANT_PAY_NUM,
+        tai.BUDGET,
+        tai.PAY_METHOD,
+        tai.EFFECT_TIME,
+        tai.LIMIT_NUM,
+        tai.USE_RULE,
+        tai.CONTRACT_PHOTO,
+        tai.SHARE_FLAG,
+        tai.SHARE_TITLE,
+        tai.SHARE_CONTENT,
+        tai.SHARE_PHOTO,
+        tai.DETAIL_PHOTO,
+        tai.STATUS
+        FROM
+        T_ACTIVITY_INFO tai
+        INNER JOIN T_ACTIVITY_SPECIAL_USER tsu ON tai.ID = tsu.ACTIVITY_ID
+        AND tsu.DEL_FLAG = 0
+        WHERE
+        tai.DEL_FLAG = 0
+        AND tai.APPROVE_STATUS = '1'
+        AND tai.STATUS = '1'
+        AND SYSDATE &gt;= tai.START_TIME
+        AND SYSDATE &lt; tai.END_TIME and tsu.PHONE_NUMBER = #{phoneNumber}
+    </select>
 </mapper>

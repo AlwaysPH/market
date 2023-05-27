@@ -6,6 +6,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 /**
  * @author ph
@@ -81,4 +82,24 @@ public class AppParams implements Serializable {
      *领取方式  1 自动发放  2 手动领取
      */
     private String sendType;
+
+    /**
+     * 用户类型  0  全部  1  新用户   2  首单
+     */
+    private Integer userType;
+
+    /**
+     * 商户号
+     */
+    private String merchantNo;
+
+    /**
+     * 订单原总金额
+     */
+    private BigDecimal orderAmount;
+
+    /**
+     * 用户领取优惠券表id
+     */
+    private String userCouponId;
 }

@@ -166,7 +166,7 @@ public class CouponServiceImpl implements CouponService {
         //判断当前优惠券是否关联活动
         int count = couponMapper.getActivityNum(param.getId());
         if(count > 0){
-            throw new ServiceException("当前优惠券已关联活动，不允许修改");
+            throw new ServiceException("当前优惠券关联的活动已审核通过，不允许修改");
         }
         info.setUpdateBy(SecurityUtils.getUserId());
         info.setUpdateTime(DateUtils.getNowDate());
@@ -349,7 +349,7 @@ public class CouponServiceImpl implements CouponService {
             thresholdMap = thresholdList.stream().collect(Collectors.groupingBy(CouponThreshold::getCouponId));
         }
         //获取优惠券领取数据
-        List<UserCouponInfo> receiveList = couponMapper.getReceiveList(idList);
+        List<UserCouponInfo> receiveList = couponMapper.getReceiveList(idList, null);
         Map<String, List<UserCouponInfo>> receiveMap = Maps.newHashMap();
         if(CollectionUtils.isNotEmpty(receiveList)){
             receiveMap = receiveList.stream().collect(Collectors.groupingBy(UserCouponInfo::getCouponId));
@@ -418,7 +418,21 @@ public class CouponServiceImpl implements CouponService {
                 e.setEffectEndTime(effectEndTime);
             }
         });
-        return list;
+        List<CouponThreshold> result = Lists.newArrayList();
+        //阶梯满减券使用门槛合并
+        if(CollectionUtils.isNotEmpty(list)){
+            //阶梯满减券
+            List<CouponThreshold> collect = list.stream().filter(e -> StringUtils.equalsIgnoreCase(e.getRestrictionType(), RestrictionTypeEnum.LADDER.getCode())).collect(Collectors.toList());
+            //非阶梯满减券
+            List<CouponThreshold> otherList = list.stream().filter(e -> !StringUtils.equalsIgnoreCase(e.getRestrictionType(), RestrictionTypeEnum.LADDER.getCode())).collect(Collectors.toList());
+            result.addAll(otherList);
+            if(CollectionUtils.isNotEmpty(collect)){
+                CouponThreshold threshold = collect.get(0);
+                threshold.setLadderList(collect);
+                result.add(threshold);
+            }
+        }
+        return result;
     }
 
     /**
@@ -427,13 +441,7 @@ public class CouponServiceImpl implements CouponService {
      * @return
      */
     @Override
-    public int useCoupon(AppParams params) {
-        if(StringUtils.isEmpty(params.getCouponId())){
-            throw new ServiceException("优惠券ID参数不能为空");
-        }
-        if(StringUtils.isEmpty(params.getPhoneNumber())){
-            throw new ServiceException("用户参数不能为空");
-        }
+    public int useCoupon(UseCouponParam params) {
         CouponInfo couponInfo = couponMapper.selectCouponInfoById(params.getCouponId());
         if(Objects.isNull(couponInfo)){
             throw new ServiceException("当前优惠券不存在");
@@ -444,7 +452,125 @@ public class CouponServiceImpl implements CouponService {
         }
         info.setStatus(CouponUseStatusEnum.USED.getCode());
         info.setUseTime(new Date());
-        return couponMapper.updateUserCoupon(info);
+        //更新用户使用优惠券状态
+        int i = couponMapper.updateUserCoupon(info);
+        //记录优惠券使用详情信息
+        CouponUseEntity entity = new CouponUseEntity();
+        BeanUtils.copyProperties(params, entity);
+        entity.setId(IdUtils.simpleUUID());
+        entity.setTransTime(DateUtils.transLongToDate(params.getTime()));
+        entity.setCreateTime(new Date());
+        entity.setChannelType(couponInfo.getChannelType());
+        i += couponMapper.insertCouponUseDetail(entity);
+        return i;
+    }
+
+    /**
+     * 获取最优支付的优惠券
+     * @param params
+     * @return
+     */
+    @Override
+    public UserCouponEntity getOptimalCoupon(AppParams params) {
+        if(StringUtils.isEmpty(params.getPhoneNumber())){
+            throw new ServiceException("用户手机号不能为空");
+        }
+        if(StringUtils.isEmpty(params.getMerchantNo())){
+            throw new ServiceException("商户号不能为空");
+        }
+        if(Objects.isNull(params.getOrderAmount())){
+            throw new ServiceException("订单原总金额不能为空");
+        }
+        List<CouponThreshold> list = thresholdMapper.getUserCouponList(params);
+        if(CollectionUtils.isEmpty(list)){
+            return new UserCouponEntity();
+        }
+        Map<String, List<CouponThreshold>> map = list.stream().collect(Collectors.groupingBy(CouponThreshold::getCouponType));
+        List<UserCouponEntity> result = Lists.newArrayList();
+        map.forEach((key, tList) -> {
+            UserCouponEntity entity = new UserCouponEntity();
+            if(StringUtils.equalsIgnoreCase(CouponTypeEnum.FULL.getCode(), key)){
+                /**满减券**/
+                Map<String, List<CouponThreshold>> collect = tList.stream().collect(Collectors.groupingBy(CouponThreshold::getRestrictionType));
+                collect.forEach((type, data) -> {
+                    if(StringUtils.equalsIgnoreCase(RestrictionTypeEnum.LADDER.getCode(), type)){
+                        //阶梯满减
+                        //判断符合满减金额条件的数据
+                        List<CouponThreshold> collect1 = data.stream().filter(e -> e.getFullSubCondition().compareTo(params.getOrderAmount()) <= 0).collect(Collectors.toList());
+                        if(CollectionUtils.isNotEmpty(collect1)){
+                            //获取满足条件中满减金额最大的数据
+                            CouponThreshold threshold = collect1.stream().max(Comparator.comparing(CouponThreshold::getFullSubAmount)).get();
+                            entity.setUserCouponId(threshold.getUserCouponId());
+                            entity.setOptimalAmount(threshold.getFullSubAmount());
+                            result.add(entity);
+                        }
+                    }else if(StringUtils.equalsIgnoreCase(RestrictionTypeEnum.NO.getCode(), type)){
+                        //无限制
+                        CouponThreshold threshold = data.get(0);
+                        entity.setUserCouponId(threshold.getUserCouponId());
+                        entity.setOptimalAmount(threshold.getDisAmount());
+                        result.add(entity);
+                    }else if(StringUtils.equalsIgnoreCase(RestrictionTypeEnum.FIX.getCode(), type)){
+                        //固定满减
+                        CouponThreshold threshold = data.get(0);
+                        if(threshold.getFullFixSubCondition().compareTo(params.getOrderAmount()) <= 0){
+                            entity.setUserCouponId(threshold.getUserCouponId());
+                            entity.setOptimalAmount(threshold.getDisFixAmount());
+                            result.add(entity);
+                        }
+                    }
+                });
+            }else if(StringUtils.equalsIgnoreCase(CouponTypeEnum.SALE.getCode(), key)){
+                /**折扣券**/
+                CouponThreshold threshold = tList.get(0);
+                BigDecimal divide = threshold.getFullRestriction().multiply(threshold.getSaleNum()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP);
+                if(StringUtils.equalsIgnoreCase(threshold.getUpperLimitFlag(), UpperLimitTypeEnum.YES.getCode())){
+                    if(divide.compareTo(threshold.getUpperLimitAmount()) > 0){
+                        divide = threshold.getUpperLimitAmount();
+                    }
+                }
+                entity.setUserCouponId(threshold.getUserCouponId());
+                entity.setOptimalAmount(divide);
+                result.add(entity);
+            }else if(StringUtils.equalsIgnoreCase(CouponTypeEnum.VOUCHER.getCode(), key)){
+                /**代金券**/
+                CouponThreshold threshold = tList.get(0);
+                if(threshold.getOrderAmount().compareTo(params.getOrderAmount()) <= 0){
+                    entity.setUserCouponId(threshold.getUserCouponId());
+                    entity.setOptimalAmount(threshold.getFaceMoney());
+                    result.add(entity);
+                }
+            }
+        });
+        if(CollectionUtils.isEmpty(result)){
+            return new UserCouponEntity();
+        }
+        UserCouponEntity entity = result.stream().max(Comparator.comparing(UserCouponEntity::getOptimalAmount)).get();
+        return entity;
+    }
+
+    /**
+     * 获取优惠券详细信息
+     * @param params
+     * @return
+     */
+    @Override
+    public CouponThreshold getCouponDetail(AppParams params) {
+        if(StringUtils.isEmpty(params.getUserCouponId())){
+            throw new ServiceException("用户关联优惠券id不能为空");
+        }
+        if(StringUtils.isEmpty(params.getCouponId())){
+            throw new ServiceException("优惠券id不能为空");
+        }
+        CouponInfo info = couponMapper.selectCouponInfoById(params.getCouponId());
+        if(Objects.isNull(info)){
+            throw new ServiceException("当前优惠券不存在");
+        }
+        List<CouponThreshold> list = couponMapper.getUserCouponList(params);
+        if(CollectionUtils.isEmpty(list)){
+            throw new ServiceException("当前用户未领取该优惠券");
+        }
+        return list.get(0);
     }
 
     /**

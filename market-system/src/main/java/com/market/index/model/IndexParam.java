@@ -45,6 +45,13 @@ public class IndexParam extends BaseEntity implements Serializable {
      */
     private String beginTime;
 
-    private List<String> idList;
+    /**
+     * 优惠券id列表
+     */
+    private List<String> couponIdList;
 
+    /**
+     * 活动id列表
+     */
+    private List<String> activityIdList;
 }

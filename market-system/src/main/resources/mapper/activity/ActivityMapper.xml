@@ -295,9 +295,43 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
 
     <select id="getAppActivityList" resultMap="baseMap">
-        select <include refid="all_column"/> from T_ACTIVITY_INFO
-        where DEL_FLAG = 0 and APPROVE_STATUS = '1' and STATUS = '1'
-        and SYSDATE &gt;= START_TIME and SYSDATE &lt; END_TIME
+        SELECT
+        tai.ID,
+        tai.ACTIVITY_ABB,
+        tai.ACTIVITY_NAME,
+        tai.START_TIME,
+        tai.END_TIME,
+        tai.XIAOXIANG_PAY_NUM,
+        tai.ORG_NAME,
+        tai.ORG_PAY_NUM,
+        tai.MERCHANT_PAY_NUM,
+        tai.BUDGET,
+        tai.PAY_METHOD,
+        tai.EFFECT_TIME,
+        tai.LIMIT_NUM,
+        tai.USE_RULE,
+        tai.CONTRACT_PHOTO,
+        tai.SHARE_FLAG,
+        tai.SHARE_TITLE,
+        tai.SHARE_CONTENT,
+        tai.SHARE_PHOTO,
+        tai.DETAIL_PHOTO,
+        tai.STATUS,
+        tac.RECEIVE_TYPE as receiveType
+        FROM
+        T_ACTIVITY_INFO tai
+        LEFT JOIN T_ACTIVITY_COUPON tac ON tai.ID = tac.ACTIVITY_ID
+        AND tac.DEL_FLAG = 0
+        WHERE
+        tai.DEL_FLAG = 0
+        AND tai.APPROVE_STATUS = '1'
+        AND tai.STATUS = '1'
+        AND SYSDATE &gt;= tai.START_TIME
+        AND SYSDATE &lt; tai.END_TIME
+        AND tac.RECEIVE_TYPE in
+        <foreach collection="list" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
     </select>
 
     <select id="getTimeOutList" resultMap="baseMap">

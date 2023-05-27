@@ -42,22 +42,27 @@ public class SummaryInfo implements Serializable {
     private Double useRate;
 
     /**
-     * 交易总金额
+     * 交易总金额(使用该优惠券的总金额)
      */
     private BigDecimal amount;
 
     /**
-     * 用券总单量
+     * 优惠金额(使用该优惠券的总金额)
+     */
+    private BigDecimal disAmount;
+
+    /**
+     * 用券总单量(使用优惠券的付款订单总数)
      */
     private Integer orderNum;
 
     /**
-     * 用券笔单价
+     * 用券笔单价(用券总成交额/使用优惠券的付款订单总数)
      */
-    private Integer orderPrice;
+    private BigDecimal orderPrice;
 
     /**
-     * 拉新数
+     * 拉新数（领取过优惠券的用户中，标记为新用户的数量）
      */
     private Integer newNum;
 
@@ -75,6 +80,11 @@ public class SummaryInfo implements Serializable {
      *优惠券码
      */
     private String couponCode;
+
+    /**
+     *活动id
+     */
+    private String activityId;
 
     /**
      *活动名称

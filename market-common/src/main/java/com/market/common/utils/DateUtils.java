@@ -227,4 +227,15 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
         Date time = mon.getTime();
         return time;
     }
+
+    /**
+     * 时间戳转换成date
+     * @param times
+     * @return
+     */
+    public static Date transLongToDate(Long times){
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(times);
+        return cal.getTime();
+    }
 }

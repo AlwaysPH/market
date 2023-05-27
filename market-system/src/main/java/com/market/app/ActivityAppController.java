@@ -34,10 +34,10 @@ public class ActivityAppController extends BaseController {
      */
     @RepeatSubmit
     @PostMapping("/getActivityList")
-    public TableDataInfo getActivityList(){
+    public TableDataInfo getActivityList(@RequestBody AppParams params){
         startPage();
-        List<ActivityInfo> list = activityService.getAppActivityList();
-        return getDataTable(list);
+        List<ActivityInfo> list = activityService.getAppActivityList(params);
+        return getDataToTable(list);
     }
 
     /**

@@ -1,5 +1,6 @@
 package com.market.activity.mapper;
 
+import com.market.activity.model.ActivityInfo;
 import com.market.activity.model.CardInfo;
 import com.market.coupon.model.AppParams;
 import org.apache.ibatis.annotations.Param;
@@ -36,4 +37,11 @@ public interface ActivitySpecialUserMapper {
      * @return
      */
     int delete(@Param("list") List<String> list, @Param("userId") String userId);
+
+    /**
+     * 根据手机号获取指定用户关联的活动信息
+     * @param phoneNumber
+     * @return
+     */
+    List<ActivityInfo> getSpecialDataByPhone(String phoneNumber);
 }

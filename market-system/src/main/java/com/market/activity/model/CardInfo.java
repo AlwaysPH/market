@@ -65,6 +65,12 @@ public class CardInfo extends BaseEntity implements Serializable {
     private String cardFaceName;
 
     /**
+     * 手机号
+     */
+    @Excel(name = "手机号")
+    private String phoneNumber;
+
+    /**
      *删除标识 0 未删除   1  删除
      */
     private String delFlag;

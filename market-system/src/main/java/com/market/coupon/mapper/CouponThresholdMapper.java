@@ -1,6 +1,7 @@
 package com.market.coupon.mapper;
 
 import com.market.activity.model.ActivityInfo;
+import com.market.coupon.model.AppParams;
 import com.market.coupon.model.CouponThreshold;
 import org.apache.ibatis.annotations.Param;
 
@@ -49,4 +50,11 @@ public interface CouponThresholdMapper {
      * @return
      */
     List<CouponThreshold> getAppActivityCouponList(ActivityInfo info);
+
+    /**
+     * 获取用户领取的优惠券
+     * @param params
+     * @return
+     */
+    List<CouponThreshold> getUserCouponList(AppParams params);
 }

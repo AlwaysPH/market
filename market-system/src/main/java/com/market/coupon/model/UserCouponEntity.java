@@ -4,6 +4,7 @@ import com.market.common.annotation.Excel;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 /**
  * 用户领取优惠券信息
@@ -32,4 +33,14 @@ public class UserCouponEntity extends UserCouponInfo implements Serializable {
      */
     @Excel(name = "关联活动", sort = 2)
     private String activityName;
+
+    /**
+     * 优惠券最优金额
+     */
+    private BigDecimal optimalAmount;
+
+    /**
+     * 用户关联优惠券表id
+     */
+    private String userCouponId;
 }

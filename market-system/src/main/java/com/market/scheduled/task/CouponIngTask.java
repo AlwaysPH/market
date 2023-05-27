@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 用户优惠券生效任务
@@ -49,7 +50,7 @@ public class CouponIngTask implements QuartzScheduleTask {
     public void execute() {
         boolean lock = false;
         try {
-            lock = redisTemplate.opsForValue().setIfAbsent(KEY, LOCK);
+            lock = redisTemplate.opsForValue().setIfAbsent(KEY, LOCK, 30, TimeUnit.SECONDS);
             log.info("执行用户优惠券生效任务是否获取到锁:" + lock);
             if(lock){
                 log.info("开始用户优惠券生效任务......");

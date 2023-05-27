@@ -203,6 +203,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             tci.COUPON_NAME as couponName,
             tci.USE_DESC as useDesc,
             tci.CONDITION_DESC as conditionDesc,
+            tci.CHANNEL_TYPE as channelType,
             tac.RECEIVE_TYPE as receiveType,
             tac.EFFECT_TYPE as effectType,
             tac.EFFECT_START_TIME as effectStartTime,
@@ -222,7 +223,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             tct.SALE_NUM,
             tct.UPPER_LIMIT_FLAG,
             tct.UPPER_LIMIT_AMOUNT,
-            tct.MONEY,
+            tct.MONEY as faceMoney,
             tct.ORDER_AMOUNT,
             tct.PAY_AMOUNT
         FROM
@@ -236,5 +237,38 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         WHERE
             tai.DEL_FLAG = 0 and tai.APPROVE_STATUS = '1' and tai.STATUS = '1'
             AND tai.ID = #{id}
+    </select>
+
+    <select id="getUserCouponList" resultType="com.market.coupon.model.UseCouponParam">
+        SELECT
+            tuc.id as userCouponId,
+            tuc.COUPON_ID as couponId,
+            tuc.ACTIVITY_ID as activityId,
+            tci.COUPON_NAME as couponName,
+            tct.COUPON_TYPE as couponType,
+            tct.RESTRICTION_TYPE as restrictionType,
+            tct.FULL_SUB_CONDITION as fullSubCondition,
+            tct.FULL_SUB_AMOUNT as fullSubAmount,
+            tct.DIS_AMOUNT as disAmount,
+            tct.FULL_RESTRICTION as fullRestriction,
+            tct.SALE_NUM as saleNum,
+            tct.UPPER_LIMIT_FLAG as upperLimitFlag,
+            tct.UPPER_LIMIT_AMOUNT as upperLimitAmount,
+            tct.MONEY as faceMoney,
+            tct.ORDER_AMOUNT as orderAmount,
+            tct.FULL_FIX_SUB_CONDITION as fullFixSubCondition,
+            tct.DIS_FIX_AMOUNT as disFixAmount
+        FROM
+            T_USER_COUPON tuc
+            INNER JOIN T_ACTIVITY_MERCHANT tam ON tuc.ACTIVITY_ID = tam.ACTIVITY_ID
+            AND tam.DEL_FLAG = 0
+            LEFT JOIN T_COUPON_INFO tci ON tci.ID = tuc.COUPON_ID
+            AND tci.DEL_FLAG = 0
+            LEFT JOIN T_COUPON_THRESHOLD tct ON tct.COUPON_ID = tuc.COUPON_ID
+            AND tct.DEL_FLAG = 0
+        WHERE
+            tuc.STATUS = '2'
+            AND tuc.PHONENUMBER = #{phoneNumber}
+            AND tam.MERCHANT_NO = #{merchantNo}
     </select>
 </mapper>

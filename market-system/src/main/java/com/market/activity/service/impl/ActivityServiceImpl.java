@@ -1,7 +1,6 @@
 package com.market.activity.service.impl;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.market.activity.mapper.*;
 import com.market.activity.model.*;
 import com.market.activity.service.ActivityService;
@@ -23,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -36,6 +34,8 @@ import java.util.stream.Collectors;
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class ActivityServiceImpl implements ActivityService {
+
+    private static final String SPLIT_STR = "~";
 
     @Autowired
     private ActivityMapper mapper;
@@ -809,10 +809,29 @@ public class ActivityServiceImpl implements ActivityService {
     /**
      * 获取APP的活动列表
      * @return
+     * @param params
      */
     @Override
-    public List<ActivityInfo> getAppActivityList() {
-        return mapper.getAppActivityList();
+    public List<ActivityInfo> getAppActivityList(AppParams params) {
+        if(Objects.isNull(params.getUserType())){
+            throw new ServiceException("用户类型不能为空");
+        }
+        List<String> typeList = Arrays.asList(params.getUserType().toString());
+        if(StringUtils.equalsIgnoreCase(params.getUserType().toString(), ReceiveTypeEnum.NEW_USER.getCode())
+                ||  StringUtils.equalsIgnoreCase(params.getUserType().toString(), ReceiveTypeEnum.NEW_ORDER.getCode())){
+            if(StringUtils.isEmpty(params.getPhoneNumber())){
+                throw new ServiceException("用户手机号不能为空");
+            }
+            typeList.add(ReceiveTypeEnum.ALL.getCode());
+        }
+        //获取全部、新用户或全部、首单的活动数据
+        List<ActivityInfo> list = mapper.getAppActivityList(typeList);
+        //获取当前账号指定参加的活动数据
+        if(StringUtils.isNotEmpty(params.getPhoneNumber())){
+            List<ActivityInfo> specialList = specialUserMapper.getSpecialDataByPhone(params.getPhoneNumber());
+            list.addAll(specialList);
+        }
+        return list;
     }
 
     /**
@@ -841,7 +860,57 @@ public class ActivityServiceImpl implements ActivityService {
         if(activityInfo.getEndTime().getTime() < System.currentTimeMillis()){
             throw new ServiceException("当前活动已结束");
         }
-        return thresholdMapper.getAppActivityCouponList(info);
+        List<CouponThreshold> list = thresholdMapper.getAppActivityCouponList(info);
+        List<CouponThreshold> result = Lists.newArrayList();
+        //阶梯满减券使用门槛合并
+        if(CollectionUtils.isNotEmpty(list)){
+            //阶梯满减券
+            List<CouponThreshold> collect = list.stream().filter(e -> StringUtils.equalsIgnoreCase(e.getRestrictionType(), RestrictionTypeEnum.LADDER.getCode())).collect(Collectors.toList());
+            //非阶梯满减券
+            List<CouponThreshold> otherList = list.stream().filter(e -> !StringUtils.equalsIgnoreCase(e.getRestrictionType(), RestrictionTypeEnum.LADDER.getCode())).collect(Collectors.toList());
+            result.addAll(otherList);
+            if(CollectionUtils.isNotEmpty(collect)){
+                CouponThreshold threshold = collect.get(0);
+                threshold.setLadderList(collect);
+                result.add(threshold);
+            }
+        }
+        //获取优惠券发放
+        List<GrantInfo> grantList = grantMapper.getDataList(info.getId(), null);
+        Map<String, List<GrantInfo>> grantMap = null;
+        if(CollectionUtils.isNotEmpty(grantList)){
+            grantMap = grantList.stream().collect(Collectors.groupingBy(GrantInfo::getCouponId));
+        }
+        //优惠券领取
+        List<UserCouponInfo> userList = couponMapper.getReceiveList(null, info.getId());
+        Map<String, List<UserCouponInfo>> userMap = null;
+        if(CollectionUtils.isNotEmpty(userList)){
+            userMap = userList.stream().collect(Collectors.groupingBy(UserCouponInfo::getCouponId));
+        }
+        Map<String, List<GrantInfo>> finalGrantMap = grantMap;
+        Map<String, List<UserCouponInfo>> finalUserMap = userMap;
+        result.forEach(e -> {
+            int grantNum = 0;
+            int receiveNum = 0;
+            if(Objects.nonNull(finalGrantMap)){
+                List<GrantInfo> grantInfos = finalGrantMap.get(e.getCouponId());
+                if(CollectionUtils.isNotEmpty(grantInfos)){
+                    grantNum = grantInfos.stream().mapToInt(GrantInfo::getGrantNum).sum();
+                    e.setGrantNum(grantNum);
+                }
+            }
+            if(Objects.nonNull(finalUserMap)){
+                List<UserCouponInfo> couponInfos = finalUserMap.get(e.getCouponId());
+                if(CollectionUtils.isNotEmpty(couponInfos)){
+                    receiveNum = couponInfos.stream().mapToInt(UserCouponInfo::getReceiveNum).sum();
+                    e.setReceiveNum(receiveNum);
+                }
+            }
+            int surplusNum = grantNum - receiveNum;
+            e.setSurplusNum(surplusNum > 0 ? surplusNum : 0);
+            e.setFullFlag(receiveNum >= grantNum ? 1 : 0);
+        });
+        return result;
     }
 
     /**
@@ -901,6 +970,7 @@ public class ActivityServiceImpl implements ActivityService {
             GrantInfo grantInfo = grantInfos.get(0);
             AppParams param = new AppParams();
             param.setCouponId(params.getCouponId());
+            param.setActivityId(params.getActivityId());
             int num = couponMapper.getPersonReceiveNum(param);
             if(num >= grantInfo.getGrantNum().intValue()){
                 throw new ServiceException("当前优惠券库存不足，操作失败");
@@ -913,6 +983,7 @@ public class ActivityServiceImpl implements ActivityService {
         data.setIpAddress(IpUtils.getIpAddr());
         data.setReceiveTime(date);
         data.setStatus(judgeCouponStatus(activityInfo, info, date));
+        data.setChannelType(couponInfo.getChannelType());
         couponMapper.insertCouponUser(data);
         return AjaxResult.success();
     }
@@ -948,7 +1019,7 @@ public class ActivityServiceImpl implements ActivityService {
         }else if(System.currentTimeMillis() >= activityInfo.getEndTime().getTime()){
             return CouponUseStatusEnum.TIME_OUT.getCode();
         }else if(System.currentTimeMillis() < activityInfo.getStartTime().getTime()){
-            return CouponUseStatusEnum.UN_USED.getCode();
+            return CouponUseStatusEnum.UN_EFFECT.getCode();
         }
         return CouponUseStatusEnum.UN_USED.getCode();
     }

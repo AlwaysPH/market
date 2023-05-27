@@ -139,4 +139,10 @@ public class CouponInfo extends BaseEntity implements Serializable {
 
     @Transient
     private String endTime;
+
+    /**
+     *优惠券渠道  1 潇湘支付优惠券
+     */
+    @NotNull(message = "优惠券渠道不能为空")
+    private String channelType;
 }

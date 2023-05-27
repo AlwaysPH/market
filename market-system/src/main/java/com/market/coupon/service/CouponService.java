@@ -77,5 +77,19 @@ import java.util.List;
       * @param params
      * @return
      */
-    int useCoupon(AppParams params);
+    int useCoupon(UseCouponParam params);
+
+    /**
+     * 获取最优支付的优惠券
+     * @param params
+     * @return
+     */
+    UserCouponEntity getOptimalCoupon(AppParams params);
+
+    /**
+     * 获取优惠券详细信息
+     * @param params
+     * @return
+     */
+    CouponThreshold getCouponDetail(AppParams params);
 }
