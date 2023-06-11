@@ -4,8 +4,10 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.market.activity.mapper.ActivityCouponMapper;
 import com.market.activity.mapper.ActivityMapper;
+import com.market.activity.mapper.MerchantMapper;
 import com.market.activity.model.ActivityCouponInfo;
 import com.market.activity.model.ActivityInfo;
+import com.market.activity.model.MerchantInfo;
 import com.market.common.enums.*;
 import com.market.common.exception.ServiceException;
 import com.market.common.utils.CommonUtils;
@@ -18,6 +20,7 @@ import com.market.coupon.mapper.CouponThresholdMapper;
 import com.market.coupon.model.*;
 import com.market.coupon.service.CouponService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,6 +29,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 
+import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -57,6 +61,9 @@ public class CouponServiceImpl implements CouponService {
 
     @Autowired
     private ActivityMapper activityMapper;
+
+    @Autowired
+    private MerchantMapper merchantMapper;
 
     /**
      * 查询优惠券信息
@@ -168,10 +175,10 @@ public class CouponServiceImpl implements CouponService {
         if(count > 0){
             throw new ServiceException("当前优惠券关联的活动已审核通过，不允许修改");
         }
-        info.setUpdateBy(SecurityUtils.getUserId());
-        info.setUpdateTime(DateUtils.getNowDate());
+        param.setUpdateBy(SecurityUtils.getUserId());
+        param.setUpdateTime(DateUtils.getNowDate());
         //修改优惠券信息
-        int i = couponMapper.updateCouponInfo(info);
+        int i = couponMapper.updateCouponInfo(param);
         //若修改了使用门槛类型，删除原先的使用门槛数据
         i += thresholdMapper.deleteByCouponId(info.getId());
         List<CouponThreshold> list = getCouponThreshold(param, info);
@@ -335,6 +342,13 @@ public class CouponServiceImpl implements CouponService {
         if(StringUtils.isEmpty(info.getCouponType())){
             throw new ServiceException("卡券类型不允许为空");
         }
+        if(StringUtils.isEmpty(info.getActivityId())){
+            throw new ServiceException("活动id不允许为空");
+        }
+        ActivityInfo activityInfo = activityMapper.selectActivityInfoById(info.getActivityId());
+        if(Objects.isNull(activityInfo)){
+            throw new ServiceException("活动信息不存在");
+        }
         //获取优惠券列表
         List<CouponInfo> infoList = couponMapper.selectCouponInfoList(info);
         if(CollectionUtils.isEmpty(infoList)){
@@ -349,31 +363,33 @@ public class CouponServiceImpl implements CouponService {
             thresholdMap = thresholdList.stream().collect(Collectors.groupingBy(CouponThreshold::getCouponId));
         }
         //获取优惠券领取数据
-        List<UserCouponInfo> receiveList = couponMapper.getReceiveList(idList, null);
+        List<UserCouponInfo> receiveList = couponMapper.getReceiveList(idList, info.getActivityId());
         Map<String, List<UserCouponInfo>> receiveMap = Maps.newHashMap();
         if(CollectionUtils.isNotEmpty(receiveList)){
             receiveMap = receiveList.stream().collect(Collectors.groupingBy(UserCouponInfo::getCouponId));
         }
         //获取优惠券关联活动数据
-        List<ActivityCoupon> activityCouponList = couponMapper.getActivityCouponList(idList);
-        Map<String, List<ActivityCoupon>> activityMap = Maps.newHashMap();
-        if(CollectionUtils.isNotEmpty(activityCouponList)){
-            activityMap = activityCouponList.stream().collect(Collectors.groupingBy(ActivityCoupon::getCouponId));
-        }
+//        List<ActivityCoupon> activityCouponList = couponMapper.getActivityCouponList(idList);
+//        Map<String, List<ActivityCoupon>> activityMap = Maps.newHashMap();
+//        if(CollectionUtils.isNotEmpty(activityCouponList)){
+//            activityMap = activityCouponList.stream().collect(Collectors.groupingBy(ActivityCoupon::getCouponId));
+//        }
         Map<String, List<UserCouponInfo>> finalReceiveMap = receiveMap;
-        Map<String, List<ActivityCoupon>> finalActivityMap = activityMap;
+//        Map<String, List<ActivityCoupon>> finalActivityMap = activityMap;
         Map<String, List<CouponThreshold>> finalThresholdMap = thresholdMap;
         infoList.forEach(e -> {
             CouponEntity entity = new CouponEntity();
             BeanUtils.copyProperties(e, entity);
+            entity.setGrantNum(0);
+            entity.setCouponAmount(BigDecimal.ZERO);
             List<UserCouponInfo> receiveData = finalReceiveMap.get(e.getId());
             if(CollectionUtils.isNotEmpty(receiveData)){
                 entity.setGrantNum(receiveData.get(0).getReceiveNum());
             }
-            List<ActivityCoupon> activityCoupons = finalActivityMap.get(e.getId());
-            if(CollectionUtils.isNotEmpty(activityCoupons)){
-                entity.setInventoryNum(activityCoupons.get(0).getInventoryNum());
-            }
+//            List<ActivityCoupon> activityCoupons = finalActivityMap.get(e.getId());
+//            if(CollectionUtils.isNotEmpty(activityCoupons)){
+//                entity.setInventoryNum(activityCoupons.get(0).getInventoryNum());
+//            }
             List<CouponThreshold> thresholds = finalThresholdMap.get(e.getId());
             if(CollectionUtils.isNotEmpty(thresholds)){
                 buildCouponAmount(entity, thresholds, true);
@@ -410,6 +426,12 @@ public class CouponServiceImpl implements CouponService {
         if(CollectionUtils.isEmpty(list)){
             return Lists.newArrayList();
         }
+        List<CouponThreshold> result = getCouponList(list);
+        return result;
+    }
+
+    private List<CouponThreshold> getCouponList(List<CouponThreshold> list) {
+        List<CouponThreshold> result = Lists.newArrayList();
         //计算配置日期的优惠券失效时间
         list.forEach(e -> {
             if(StringUtils.equalsIgnoreCase(e.getEffectType(), CouponEffectTypeEnum.ACC.getCode())){
@@ -418,21 +440,34 @@ public class CouponServiceImpl implements CouponService {
                 e.setEffectEndTime(effectEndTime);
             }
         });
-        List<CouponThreshold> result = Lists.newArrayList();
         //阶梯满减券使用门槛合并
         if(CollectionUtils.isNotEmpty(list)){
             //阶梯满减券
             List<CouponThreshold> collect = list.stream().filter(e -> StringUtils.equalsIgnoreCase(e.getRestrictionType(), RestrictionTypeEnum.LADDER.getCode())).collect(Collectors.toList());
+            List<CouponThresholdEntity> ladderList = buildEntity(collect);
             //非阶梯满减券
             List<CouponThreshold> otherList = list.stream().filter(e -> !StringUtils.equalsIgnoreCase(e.getRestrictionType(), RestrictionTypeEnum.LADDER.getCode())).collect(Collectors.toList());
             result.addAll(otherList);
             if(CollectionUtils.isNotEmpty(collect)){
                 CouponThreshold threshold = collect.get(0);
-                threshold.setLadderList(collect);
+                threshold.setLadderList(ladderList);
                 result.add(threshold);
             }
         }
         return result;
+    }
+
+    private List<CouponThresholdEntity> buildEntity(List<CouponThreshold> collect) {
+        List<CouponThresholdEntity> data = Lists.newArrayList();
+        if(CollectionUtils.isEmpty(collect)){
+            return data;
+        }
+        collect.forEach(e -> {
+            CouponThresholdEntity entity = new CouponThresholdEntity();
+            BeanUtils.copyProperties(e, entity);
+            data.add(entity);
+        });
+        return data;
     }
 
     /**
@@ -446,23 +481,76 @@ public class CouponServiceImpl implements CouponService {
         if(Objects.isNull(couponInfo)){
             throw new ServiceException("当前优惠券不存在");
         }
+        List<CouponThreshold> data = thresholdMapper.getDataByCouponId(params.getCouponId(), null);
+        if(CollectionUtils.isEmpty(data)){
+            throw new ServiceException("当前优惠券优惠金额不存在");
+        }
+        CouponThreshold threshold = data.get(0);
+        if(!judgePayAmount(threshold, params.getDisAmount())){
+            throw new ServiceException("当前订单优惠金额不正确");
+        }
         UserCouponInfo info = couponMapper.getUserCouponData(params);
         if(Objects.isNull(info)){
             throw new ServiceException("当前用户不存在该优惠券");
         }
-        info.setStatus(CouponUseStatusEnum.USED.getCode());
+        info.setStatus(params.getStatus());
         info.setUseTime(new Date());
+        info.setWriteOffCode(params.getWriteOffCode());
         //更新用户使用优惠券状态
         int i = couponMapper.updateUserCoupon(info);
         //记录优惠券使用详情信息
-        CouponUseEntity entity = new CouponUseEntity();
-        BeanUtils.copyProperties(params, entity);
-        entity.setId(IdUtils.simpleUUID());
-        entity.setTransTime(DateUtils.transLongToDate(params.getTime()));
-        entity.setCreateTime(new Date());
-        entity.setChannelType(couponInfo.getChannelType());
-        i += couponMapper.insertCouponUseDetail(entity);
+        if(StringUtils.equalsIgnoreCase(params.getStatus(), CouponUseStatusEnum.USED.getCode())){
+            CouponUseEntity entity = new CouponUseEntity();
+            BeanUtils.copyProperties(params, entity);
+            entity.setId(IdUtils.simpleUUID());
+            entity.setTransTime(DateUtils.transLongToDate(params.getTime()));
+            entity.setCreateTime(new Date());
+            entity.setChannelType(couponInfo.getChannelType());
+            i += couponMapper.insertCouponUseDetail(entity);
+        }
         return i;
+    }
+
+    private boolean judgePayAmount(CouponThreshold threshold, BigDecimal disAmount) {
+        if(StringUtils.equalsIgnoreCase(threshold.getCouponType(), CouponTypeEnum.FULL.getCode())){
+            /**满减券**/
+            if(StringUtils.equalsIgnoreCase(threshold.getRestrictionType(), RestrictionTypeEnum.NO.getCode())){
+                //满减无限制
+                if(disAmount.compareTo(threshold.getDisAmount()) != 0){
+                    return false;
+                }
+            }else if(StringUtils.equalsIgnoreCase(threshold.getRestrictionType(), RestrictionTypeEnum.FIX.getCode())){
+                //满减固定
+                if(disAmount.compareTo(threshold.getDisFixAmount()) != 0){
+                    return false;
+                }
+            }else if(StringUtils.equalsIgnoreCase(threshold.getRestrictionType(), RestrictionTypeEnum.LADDER.getCode())){
+                //满减固定
+                if(disAmount.compareTo(threshold.getFullSubAmount()) != 0){
+                    return false;
+                }
+            }
+        }else if(StringUtils.equalsIgnoreCase(threshold.getCouponType(), CouponTypeEnum.SALE.getCode())){
+            /**折扣券**/
+            if(StringUtils.equalsIgnoreCase(threshold.getUpperLimitFlag(), UpperLimitTypeEnum.YES.getCode())){
+                if(disAmount.compareTo(threshold.getUpperLimitAmount()) != 0){
+                    return false;
+                }
+            }else {
+                BigDecimal fullRestriction = Objects.isNull(threshold.getFullRestriction()) ? BigDecimal.ZERO : threshold.getFullRestriction();
+                BigDecimal saleNum = Objects.isNull(threshold.getSaleNum()) ? BigDecimal.ZERO : threshold.getSaleNum();
+                BigDecimal divide = fullRestriction.multiply(saleNum).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP);
+                if(disAmount.compareTo(divide) != 0){
+                    return false;
+                }
+            }
+        }else if(StringUtils.equalsIgnoreCase(threshold.getCouponType(), CouponTypeEnum.VOUCHER.getCode())){
+            /**代金券**/
+            if(disAmount.compareTo(threshold.getFaceMoney()) != 0){
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -570,7 +658,32 @@ public class CouponServiceImpl implements CouponService {
         if(CollectionUtils.isEmpty(list)){
             throw new ServiceException("当前用户未领取该优惠券");
         }
-        return list.get(0);
+        CouponThreshold threshold = list.get(0);
+        //获取活动适用商户
+        List<MerchantInfo> merchantList = merchantMapper.getMerchantList(threshold.getActivityId(), null);
+        String merchantStr = Strings.EMPTY;
+        if(CollectionUtils.isNotEmpty(merchantList)){
+            merchantStr = merchantList.stream().map(MerchantInfo::getMerchantName).collect(Collectors.joining(","));
+        }
+        threshold.setMerchantNames(merchantStr);
+        return threshold;
+    }
+
+    /**
+     * 获取可支付的优惠券
+     * @param params
+     * @return
+     */
+    @Override
+    public List<CouponThreshold> getPayCouponList(AppParams params) {
+        if(StringUtils.isEmpty(params.getPhoneNumber())){
+            throw new ServiceException("用户手机号不能为空");
+        }
+        if(StringUtils.isEmpty(params.getMerchantNo())){
+            throw new ServiceException("商户号不能为空");
+        }
+        List<CouponThreshold> list = thresholdMapper.getUserCouponList(params);
+        return getCouponList(list);
     }
 
     /**
@@ -605,7 +718,7 @@ public class CouponServiceImpl implements CouponService {
             }else if(StringUtils.equalsIgnoreCase(CouponTypeEnum.SALE.getCode(), key)){
                 /**折扣券**/
                 CouponThreshold threshold = tList.get(0);
-                BigDecimal divide = threshold.getFullRestriction().multiply(threshold.getSaleNum()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP);
+                BigDecimal divide = threshold.getFullRestriction().subtract(threshold.getFullRestriction().multiply(threshold.getSaleNum()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP));
                 if(StringUtils.equalsIgnoreCase(threshold.getUpperLimitFlag(), UpperLimitTypeEnum.YES.getCode())){
                     if(divide.compareTo(threshold.getUpperLimitAmount()) > 0){
                         entity.setCouponAmount(threshold.getUpperLimitAmount());
@@ -614,6 +727,8 @@ public class CouponServiceImpl implements CouponService {
                 entity.setCouponAmount(divide);
             }else if(StringUtils.equalsIgnoreCase(CouponTypeEnum.VOUCHER.getCode(), key)){
                 /**代金券**/
+                CouponThreshold threshold = tList.get(0);
+                entity.setCouponAmount(threshold.getFaceMoney());
             }
         });
 

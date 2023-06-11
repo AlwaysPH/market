@@ -41,6 +41,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="regionName"    column="RANGE_NAME"    />
         <result property="regionCode"    column="RANGE_CODE"    />
         <result property="operationType"    column="OPERATION_TYPE"    />
+        <result property="intro"    column="INTRO"    />
     </resultMap>
 
     <sql id="all_column">
@@ -48,7 +49,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         XIAOXIANG_PAY_NUM, ORG_NAME, ORG_PAY_NUM, MERCHANT_PAY_NUM, ALARM_NUM, ALARM_CONTENT,
         ALARM_PHONE, ALARM_EMAIL, PAY_METHOD, EFFECT_TIME, LIMIT_NUM, USE_RULE, CONTRACT_PHOTO,
         SHARE_FLAG, SHARE_TITLE, SHARE_CONTENT, SHARE_PHOTO, DETAIL_PHOTO, CREATE_BY, CREATE_TIME, UPDATE_BY,
-        UPDATE_TIME, DEL_FLAG, STATUS, AUDIT_REMARK, AUDIT_TIME, RANGE_NAME, RANGE_CODE, OPERATION_TYPE
+        UPDATE_TIME, DEL_FLAG, STATUS, AUDIT_REMARK, AUDIT_TIME, RANGE_NAME, RANGE_CODE, OPERATION_TYPE, INTRO
     </sql>
 
     <select id="selectActivityInfoList" resultMap="baseMap">
@@ -163,6 +164,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="regionName != null">RANGE_NAME,</if>
             <if test="regionCode != null">RANGE_CODE,</if>
             <if test="operationType != null">OPERATION_TYPE,</if>
+            <if test="intro != null">INTRO,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="id != null">#{id},</if>
@@ -201,6 +203,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="regionName != null">#{regionName},</if>
             <if test="regionCode != null">#{regionCode},</if>
             <if test="operationType != null">#{operationType},</if>
+            <if test="intro != null">#{intro},</if>
          </trim>
     </insert>
 
@@ -242,6 +245,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="regionName != null">RANGE_NAME = #{regionName},</if>
             <if test="regionCode != null">RANGE_CODE = #{regionCode},</if>
             <if test="operationType != null">OPERATION_TYPE = #{operationType},</if>
+            <if test="intro != null">INTRO = #{intro},</if>
         </trim>
         where ID = #{id}
     </update>
@@ -261,7 +265,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             tci.START_TIME,
             tci.END_TIME,
             tci.APPROVE_STATUS,
-            tci.STATUS
+            tci.STATUS,
+            tci.BUDGET
         FROM
             T_ACTIVITY_INFO tci
             inner JOIN T_ACTIVITY_COUPON tac ON tci.ID = tac.ACTIVITY_ID
@@ -317,7 +322,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         tai.SHARE_PHOTO,
         tai.DETAIL_PHOTO,
         tai.STATUS,
-        tac.RECEIVE_TYPE as receiveType
+        tac.RECEIVE_TYPE as receiveType,
+        tai.INTRO
         FROM
         T_ACTIVITY_INFO tai
         LEFT JOIN T_ACTIVITY_COUPON tac ON tai.ID = tac.ACTIVITY_ID

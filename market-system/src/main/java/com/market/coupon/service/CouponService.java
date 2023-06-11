@@ -92,4 +92,11 @@ import java.util.List;
      * @return
      */
     CouponThreshold getCouponDetail(AppParams params);
+
+    /**
+     * 获取可支付的优惠券
+     * @param params
+     * @return
+     */
+    List<CouponThreshold> getPayCouponList(AppParams params);
 }

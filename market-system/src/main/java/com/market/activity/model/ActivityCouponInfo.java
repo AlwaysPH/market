@@ -1,5 +1,6 @@
 package com.market.activity.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.market.common.core.domain.BaseEntity;
 import lombok.Data;
 
@@ -76,13 +77,27 @@ public class ActivityCouponInfo extends BaseEntity implements Serializable {
     private String delFlag;
 
     /**
+     *发券开始时间
+     */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date grantStartTime;
+
+    /**
+     *发券结束时间
+     */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date grantEndTime;
+
+    /**
      *券使用有效期开始时间
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date effectStartTime;
 
     /**
      *券使用有效期结束时间
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date effectEndTime;
 
     /**

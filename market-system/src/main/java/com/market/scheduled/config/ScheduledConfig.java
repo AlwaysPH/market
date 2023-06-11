@@ -23,7 +23,7 @@ import java.util.*;
  * @version 1.0
  * @date 2023-05-21 16:49
  */
-@Configuration
+//@Configuration
 public class ScheduledConfig {
 
     private static final String THREAD_COUNT = "org.quartz.threadPool.threadCount";

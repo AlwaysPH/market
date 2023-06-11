@@ -235,7 +235,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             LEFT JOIN T_COUPON_THRESHOLD tct ON tct.COUPON_ID = tci.ID
             AND tct.DEL_FLAG = 0
         WHERE
-            tai.DEL_FLAG = 0 and tai.APPROVE_STATUS = '1' and tai.STATUS = '1'
+            tai.DEL_FLAG = 0
+            <if test="approveStatus != null and approveStatus != ''">
+                and tai.APPROVE_STATUS = #{approveStatus}
+            </if>
+            <if test="status != null and status != ''">
+                and tai.STATUS = #{status}
+            </if>
             AND tai.ID = #{id}
     </select>
 
@@ -267,7 +273,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             LEFT JOIN T_COUPON_THRESHOLD tct ON tct.COUPON_ID = tuc.COUPON_ID
             AND tct.DEL_FLAG = 0
         WHERE
-            tuc.STATUS = '2'
+            (tuc.STATUS = '1' or tuc.STATUS = '4')
             AND tuc.PHONENUMBER = #{phoneNumber}
             AND tam.MERCHANT_NO = #{merchantNo}
     </select>

@@ -1,27 +1,20 @@
 package com.market.coupon.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Data;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.List;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.market.common.core.domain.BaseEntity;
-import lombok.Data;
-
-import javax.persistence.Table;
-import javax.persistence.Transient;
 
 /**
- * 优惠券使用门槛信息对象 t_coupon_threshold
- *
- * @author ruoyi
- * @date 2023-04-15
+ * @author 00074964
+ * @version 1.0
+ * @date 2023-06-06 09:54
  */
 @Data
-@Table(name = "T_COUPON_THRESHOLD")
-public class CouponThreshold extends BaseEntity implements Serializable {
-    private static final long serialVersionUID = -5459667107162530888L;
+public class CouponThresholdEntity implements Serializable {
+    private static final long serialVersionUID = 346969198131830223L;
 
     /**
      *主键id
@@ -110,138 +103,112 @@ public class CouponThreshold extends BaseEntity implements Serializable {
     /**
      * 优惠券名称
      */
-    @Transient
     private String couponName;
 
     /**
      *领取门槛  0  全部  1 新用户   2  首单  3  指定用户
      */
-    @Transient
     private String receiveType;
 
     /**
      *券使用有效期类型 0 固定日期  1  配置日期
      */
-    @Transient
     private String effectType;
 
     /**
      *券使用有效期开始时间
      */
-    @Transient
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date effectStartTime;
 
     /**
      *券使用有效期结束时间
      */
-    @Transient
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date effectEndTime;
 
     /**
      *券生效天数
      */
-    @Transient
     private Integer takeDateNum;
 
     /**
      *券有效天数
      */
-    @Transient
     private Integer effectDateNum;
 
     /**
      *活动内同类型可是否可以叠加 0 否  1  是
      */
-    @Transient
     private String sameActivityFlag;
 
     /**
      *活动内不同类型可是否可以叠加 0 否  1  是
      */
-    @Transient
     private String diffActivityFlag;
 
     /**
      *是否允许与其他活动的卡券叠加使用  0 否 1  是
      */
-    @Transient
     private String outActivityFlag;
 
     /**
      *使用说明
      */
-    @Transient
     private String useDesc;
 
     /**
      *条件说明
      */
-    @Transient
     private String conditionDesc;
 
     /**
      * 活动名称
      */
-    @Transient
     private String activityName;
 
     /**
      * 领取时间
      */
-    @Transient
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date receiveTime;
 
     /**
      * 券状态  0 未生效  1 未使用 2 已使用  3 已失效
      */
-    @Transient
     private String status;
 
     /**
      * 活动id
      */
-    @Transient
     private String activityId;
 
     /**
      *优惠券使用日期
      */
-    @Transient
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date useTime;
 
     /**
      * 发放数量
      */
-    @Transient
     private Integer grantNum;
 
     /**
      * 领取数量
      */
-    @Transient
     private Integer receiveNum;
 
     /**
      * 剩余数量
      */
-    @Transient
     private Integer surplusNum;
 
     /**
      * 库存不足标识   0   否   1  是
      */
-    @Transient
     private Integer fullFlag;
-
-    /**
-     * 阶梯满减券使用门槛
-     */
-    @Transient
-    private List<CouponThresholdEntity> ladderList;
 
     /**
      * 用户领取优惠券表id
@@ -251,19 +218,10 @@ public class CouponThreshold extends BaseEntity implements Serializable {
     /**
      *优惠券渠道  1 潇湘支付优惠券
      */
-    @Transient
     private String channelType;
 
     /**
      * 活动适用商户
      */
-    @Transient
     private String merchantNames;
-
-    /**
-     * 使用规则
-     */
-    @Transient
-    private String useRule;
-
 }

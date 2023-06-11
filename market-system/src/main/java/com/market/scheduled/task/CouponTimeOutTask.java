@@ -40,7 +40,8 @@ public class CouponTimeOutTask implements QuartzScheduleTask {
 
     private static final String LOCK = "CouponTimeOutTask_LOCK";
 
-    private static final List<String> STATUS = Arrays.asList(CouponUseStatusEnum.UN_EFFECT.getCode(), CouponUseStatusEnum.UN_USED.getCode());
+    private static final List<String> STATUS = Arrays.asList(CouponUseStatusEnum.UN_EFFECT.getCode(),
+            CouponUseStatusEnum.UN_USED.getCode(), CouponUseStatusEnum.BACK.getCode());
 
     @Autowired
     private RedisTemplate redisTemplate;
@@ -74,7 +75,7 @@ public class CouponTimeOutTask implements QuartzScheduleTask {
         //获取未使用和未生效的优惠券列表
         List<CouponTimeOut> list = couponMapper.getTimeOutList(STATUS);
         if(CollectionUtils.isEmpty(list)){
-            log.info("无未使用和未生效的优惠券数据");
+            log.info("无未使用、未生效和退回的优惠券数据");
             return;
         }
         List<String> idList = Lists.newArrayList();

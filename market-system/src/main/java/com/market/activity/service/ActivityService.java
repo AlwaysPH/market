@@ -188,4 +188,25 @@ public interface ActivityService {
      * @return
      */
     AjaxResult getAPPActivityDetail(AppParams params);
+
+    /**
+     * 获取卡属性用户信息
+     * @param cardNo
+     * @return
+     */
+    CardInfo getCardUserInfo(String cardNo);
+
+    /**
+     * 获取商户列表
+     * @param industryType
+     * @return
+     */
+    List<MerchantInfo> getMerchantList(String industryType);
+
+    /**
+     * 获取活动已配置的商户信息
+     * @param activityId
+     * @return
+     */
+    List<MerchantInfo> getConfigMerchant(String activityId);
 }

@@ -303,4 +303,23 @@ public class ActivityInfo extends BaseEntity implements Serializable {
     @Transient
     private String effectType;
 
+    /**
+     *发券开始时间
+     */
+    @Transient
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date grantStartTime;
+
+    /**
+     *发券结束时间
+     */
+    @Transient
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date grantEndTime;
+
+    /**
+     * 活动简介
+     */
+    private String intro;
+
 }

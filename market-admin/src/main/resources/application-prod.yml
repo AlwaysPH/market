@@ -59,6 +59,7 @@ spring:
                 wall:
                     config:
                         multi-statement-allow: true
+
 #quartz任务配置(多个task以‘\’隔开)
 quartz:
     schedulerName: MARKET_SCHEDULE

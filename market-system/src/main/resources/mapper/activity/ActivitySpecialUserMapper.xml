@@ -109,4 +109,9 @@
         AND SYSDATE &gt;= tai.START_TIME
         AND SYSDATE &lt; tai.END_TIME and tsu.PHONE_NUMBER = #{phoneNumber}
     </select>
+
+    <select id="getSpecialUser" resultMap="baseMap">
+        select <include refid="all_column"/> from T_ACTIVITY_SPECIAL_USER where ACTIVITY_ID = #{activityId}
+        and DEL_FLAG = 0
+    </select>
 </mapper>

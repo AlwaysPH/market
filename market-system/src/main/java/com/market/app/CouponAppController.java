@@ -1,6 +1,5 @@
 package com.market.app;
 
-import com.market.activity.model.ActivityInfo;
 import com.market.common.annotation.RepeatSubmit;
 import com.market.common.core.controller.BaseController;
 import com.market.common.core.domain.AjaxResult;
@@ -61,6 +60,16 @@ public class CouponAppController extends BaseController {
     @PostMapping("/getOptimalCoupon")
     public AjaxResult getOptimalCoupon(@RequestBody AppParams params){
         return AjaxResult.success(couponService.getOptimalCoupon(params));
+    }
+
+    /**
+     * 获取可支付的优惠券
+     * @return
+     */
+    @RepeatSubmit
+    @PostMapping("/getPayCouponList")
+    public AjaxResult getPayCouponList(@RequestBody AppParams params){
+        return AjaxResult.success(couponService.getPayCouponList(params));
     }
 
     /**

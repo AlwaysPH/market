@@ -24,6 +24,7 @@ public class SummaryInfo implements Serializable {
     /**
      * 发放券数量
      */
+    @Excel(name = "发放券数量", sort = 5)
     private Integer sendCouponNum;
 
     /**
@@ -34,51 +35,61 @@ public class SummaryInfo implements Serializable {
     /**
      * 领取率
      */
+    @Excel(name = "领取率（%）", sort = 6)
     private Double receiveRate;
 
     /**
      * 使用率
      */
+    @Excel(name = "使用率（%）", sort = 7)
     private Double useRate;
 
     /**
      * 交易总金额(使用该优惠券的总金额)
      */
+    @Excel(name = "交易总金额（元）", sort = 9)
     private BigDecimal amount;
 
     /**
-     * 优惠金额(使用该优惠券的总金额)
+     * 优惠总金额(使用该优惠券的总金额)
      */
+    @Excel(name = "优惠总金额（元）", sort = 8)
     private BigDecimal disAmount;
 
     /**
      * 用券总单量(使用优惠券的付款订单总数)
      */
+    @Excel(name = "用券总单量", sort = 10)
     private Integer orderNum;
 
     /**
      * 用券笔单价(用券总成交额/使用优惠券的付款订单总数)
      */
+    @Excel(name = "用券笔单价（元）", sort = 11)
     private BigDecimal orderPrice;
 
     /**
      * 拉新数（领取过优惠券的用户中，标记为新用户的数量）
      */
+    @Excel(name = "拉新数", sort = 12)
     private Integer newNum;
 
     /**
      * 使用数
      */
+    @Excel(name = "使用数", sort = 13)
     private Integer useNum;
 
     /**
      * 优惠券名称
      */
+    @Excel(name = "优惠券名称", sort = 1)
     private String couponName;
 
     /**
      *优惠券码
      */
+    @Excel(name = "优惠券码", sort = 2)
     private String couponCode;
 
     /**
@@ -89,11 +100,13 @@ public class SummaryInfo implements Serializable {
     /**
      *活动名称
      */
+    @Excel(name = "活动名称", sort = 3)
     private String activityName;
 
     /**
      *活动总预算
      */
+    @Excel(name = "活动总预算（元）", sort = 4)
     private BigDecimal budget;
 
     /**

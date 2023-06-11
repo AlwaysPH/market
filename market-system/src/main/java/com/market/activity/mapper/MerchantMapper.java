@@ -29,9 +29,10 @@ public interface MerchantMapper {
     /**
      * 获取商户列表
      * @param activityId
+     * @param activityList
      * @return
      */
-    List<MerchantInfo> getMerchantList(@Param("activityId") String activityId);
+    List<MerchantInfo> getMerchantList(@Param("activityId") String activityId, @Param("activityList") List<String> activityList);
 
     /**
      * 删除活动关联商户信息

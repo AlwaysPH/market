@@ -9,7 +9,8 @@ ruoyi:
   # 实例演示开关
   demoEnabled: true
   # 文件路径 示例（ Windows配置D:/ruoyi/uploadPath，Linux配置 /home/ruoyi/uploadPath）
-  profile: D:/ruoyi/uploadPath
+  profile: F:/java/data/files
+#  profile: D:/ruoyi/uploadPath
   # 获取ip地址开关
   addressEnabled: false
   # 验证码类型 math 数组计算 char 字符验证
@@ -129,9 +130,3 @@ xss:
   excludes: /system/notice
   # 匹配链接
   urlPatterns: /system/*,/monitor/*,/tool/*
-#quartz任务配置(多个task以‘\’隔开)
-quartz:
-  schedulerName: MARKET_SCHEDULE
-  threadCount: 10
-  threadNamePrefix: quartz_worker
-  tasks: CouponIngTask:0/1 0 0/1 * * ?\CouponTimeOutTask:0/1 0 0/1 * * ?\ActivityIngTask:0/1 0 0/1 * * ?\ActivityTimeOutTask:0/1 0 0/1 * * ?

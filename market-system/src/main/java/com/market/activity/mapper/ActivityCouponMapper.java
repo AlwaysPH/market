@@ -77,4 +77,19 @@ public interface ActivityCouponMapper {
      * @return
      */
     int delete(@Param("list") List<String> list, @Param("userId") String userId);
+
+    /**
+     * 批量修改
+     * @param list
+     * @return
+     */
+    int batchUpdate(List<ActivityCouponInfo> list);
+
+    /**
+     * 批量删除
+     * @param deleteList
+     * @param userId
+     * @return
+     */
+    int batchDelete(@Param("list") List<ActivityCouponInfo> deleteList, @Param("userId") String userId);
 }

@@ -194,6 +194,16 @@ public class ActivityController extends BaseController {
     }
 
     /**
+     * 获取活动已配置的商户信息
+     * @param activityId
+     * @return
+     */
+    @GetMapping("/getConfigMerchant/{activityId}")
+    public AjaxResult getConfigMerchant(@PathVariable String activityId) {
+        return AjaxResult.success(activityService.getConfigMerchant(activityId));
+    }
+
+    /**
      * 配置商户
      */
     @PreAuthorize("@ss.hasPermi('activity:activity:merchant')")
@@ -218,18 +228,18 @@ public class ActivityController extends BaseController {
      * @throws Exception
      */
     @PostMapping("/merchantImportData")
-    public R<?> importMerchantData(MultipartFile file, String activityId) throws Exception {
+    public AjaxResult importMerchantData(MultipartFile file, String activityId) throws Exception {
         ExcelUtil<MerchantInfo> util = new ExcelUtil<MerchantInfo>(MerchantInfo.class);
         List<MerchantInfo> list = util.importExcel(file.getInputStream());
-        StringBuilder sb = new StringBuilder();
-        List<MerchantInfo> data = activityService.importMerchantData(list, sb, activityId);
-        if(StringUtils.isNotEmpty(sb)){
-            throw new ServiceException(sb.toString(), 88888);
-        }
-        if(CollectionUtils.isNotEmpty(data)){
-            activityService.batchInsertMerchantData(data);
-        }
-        return R.ok();
+//        StringBuilder sb = new StringBuilder();
+//        List<MerchantInfo> data = activityService.importMerchantData(list, sb, activityId);
+//        if(StringUtils.isNotEmpty(sb)){
+//            throw new ServiceException(sb.toString(), 88888);
+//        }
+//        if(CollectionUtils.isNotEmpty(data)){
+//            activityService.batchInsertMerchantData(data);
+//        }
+        return AjaxResult.success(list);
     }
 
     /**
@@ -248,6 +258,26 @@ public class ActivityController extends BaseController {
     @PostMapping("/restart")
     public AjaxResult restart(@RequestBody ActivityCouponParams params) {
         return toAjax(activityService.restart(params));
+    }
+
+    /**
+     * 获取卡属性用户信息
+     * @param cardNo
+     * @return
+     */
+    @GetMapping("/getCardUserInfo/{cardNo}")
+    public AjaxResult getCardUserInfo(@PathVariable String cardNo) {
+        return AjaxResult.success(activityService.getCardUserInfo(cardNo));
+    }
+
+    /**
+     * 获取商户列表
+     * @param industryType 行业类型  0 大型商场  1 大型超市  2 娱乐  3 影院 4 连锁便利店
+     * @return
+     */
+    @GetMapping("/getMerchantList/{industryType}")
+    public AjaxResult getMerchantList(@PathVariable String industryType) {
+        return AjaxResult.success(activityService.getMerchantList(industryType));
     }
 
 }

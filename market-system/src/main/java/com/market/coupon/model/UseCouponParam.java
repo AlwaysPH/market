@@ -3,7 +3,6 @@ package com.market.coupon.model;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -70,6 +69,18 @@ public class UseCouponParam implements Serializable {
      */
     @NotBlank(message = "活动id不能为空")
     private String activityId;
+
+    /**
+     * 券核销码
+     */
+//    @NotBlank(message = "券核销码不能为空")
+    private String writeOffCode;
+
+    /**
+     * 券使用状态  0 未生效  1 未使用 2 已使用  3 已失效  4 退回
+     */
+    @NotBlank(message = "券使用状态不能为空")
+    private String status;
 
     /**
      * 用户编号

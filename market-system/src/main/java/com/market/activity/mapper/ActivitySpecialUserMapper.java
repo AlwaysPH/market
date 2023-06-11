@@ -44,4 +44,11 @@ public interface ActivitySpecialUserMapper {
      * @return
      */
     List<ActivityInfo> getSpecialDataByPhone(String phoneNumber);
+
+    /**
+     * 获取活动指定用户
+     * @param activityId
+     * @return
+     */
+    List<CardInfo> getSpecialUser(String activityId);
 }

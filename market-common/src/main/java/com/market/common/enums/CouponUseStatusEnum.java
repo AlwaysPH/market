@@ -13,7 +13,9 @@ public enum CouponUseStatusEnum {
 
     USED("2", "已使用"),
 
-    TIME_OUT("3", "已失效");
+    TIME_OUT("3", "已失效"),
+
+    BACK("4", "退回");
 
     private String code;
 

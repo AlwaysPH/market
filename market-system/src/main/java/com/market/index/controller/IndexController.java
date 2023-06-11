@@ -3,14 +3,20 @@ package com.market.index.controller;
 import com.market.common.core.controller.BaseController;
 import com.market.common.core.domain.AjaxResult;
 import com.market.common.core.page.TableDataInfo;
+import com.market.common.utils.poi.ExcelUtil;
+import com.market.coupon.model.ActivityCouponEntity;
+import com.market.coupon.model.CouponInfo;
 import com.market.index.model.IndexParam;
 import com.market.index.model.SummaryInfo;
 import com.market.index.service.IndexService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
@@ -45,5 +51,15 @@ public class IndexController extends BaseController {
         startPage();
         List<SummaryInfo> list = indexService.getSummaryListData(param);
         return getDataTable(list);
+    }
+
+    /**
+     * 导出优惠券使用详情列表
+     */
+    @PostMapping("/export")
+    public void export(HttpServletResponse response, IndexParam param) {
+        List<SummaryInfo> list = indexService.getSummaryListData(param);
+        ExcelUtil<SummaryInfo> util = new ExcelUtil<SummaryInfo>(SummaryInfo.class);
+        util.exportExcel(response, list, "优惠券使用详情列表");
     }
 }

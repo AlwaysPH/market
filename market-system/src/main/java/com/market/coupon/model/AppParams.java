@@ -60,9 +60,6 @@ public class AppParams implements Serializable {
     /**
      * 卡号
      */
-    @NotNull(message = "卡号不能为空")
-    @NotBlank(message = "卡号不能为空")
-    @NotEmpty(message = "卡号不能为空")
     private String cardNumber;
 
     /**

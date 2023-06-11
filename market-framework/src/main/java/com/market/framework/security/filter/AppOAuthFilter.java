@@ -31,7 +31,7 @@ import java.util.List;
 public class AppOAuthFilter extends OncePerRequestFilter {
 
     private static final List<String> URL_PREFIX = Arrays.asList("/app/activity/receiveCoupon", "/app/coupon/getUserCouponList",
-                                                    "/app/coupon/useCoupon");
+                                                    "/app/coupon/useCoupon", "/app/coupon/getPayCouponList");
 
     private static final String KEY = "iml7fpyktj6tmtru2q4u6qzvyuezouqcaznyirq53f5s2rpf5dreg4n8zaedrdyz";
 

@@ -1,5 +1,6 @@
 package com.market.activity.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
@@ -29,6 +30,20 @@ public class ActivityCouponParams implements Serializable {
     private String receiveType;
 
     /**
+     *发券开始时间
+     */
+    @NotNull(message = "发券开始时间不能为空")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date grantStartTime;
+
+    /**
+     *发券结束时间
+     */
+    @NotNull(message = "发券结束时间不能为空")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date grantEndTime;
+
+    /**
      *券使用有效期类型 0 固定日期  1  配置日期
      */
     private String effectType;
@@ -36,11 +51,13 @@ public class ActivityCouponParams implements Serializable {
     /**
      *券使用有效期开始时间（固定日期）
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date effectStartTime;
 
     /**
      *券使用有效期结束时间（固定日期）
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date effectEndTime;
 
     /**
@@ -110,5 +127,10 @@ public class ActivityCouponParams implements Serializable {
      * 配置商户列表
      */
     List<MerchantInfo> merchantList;
+
+    /**
+     * 修改标识  0 否  1  是
+     */
+    private String isEdit;
 
 }

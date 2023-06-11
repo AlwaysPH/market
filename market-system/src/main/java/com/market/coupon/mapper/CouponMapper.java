@@ -125,7 +125,7 @@ import java.util.List;
      * @param param
      * @return
      */
-    List<SummaryInfo> getUseNumByCouponIds(IndexParam param);
+    List<SummaryInfo> getUseNumByCouponIds(@Param("param") IndexParam param);
 
    /**
     * 获取优惠券关联活动数量
@@ -208,12 +208,18 @@ import java.util.List;
      * @param param
      * @return
      */
-    List<CouponUseEntity> getCouponUseDetailList(IndexParam param);
+    List<CouponUseEntity> getCouponUseDetailList(@Param("param") IndexParam param);
 
     /**
      * 获取优惠券拉新数
      * @param param
      * @return
      */
-    List<CouponUseEntity> getNewNumByGroup(IndexParam param);
+    List<CouponUseEntity> getNewNumByGroup(@Param("param") IndexParam param);
+
+    /**
+     * 批量插入用户优惠券信息
+     * @param list
+     */
+    void batchCouponUser(List<UserCouponInfo> list);
 }

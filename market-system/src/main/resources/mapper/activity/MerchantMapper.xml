@@ -73,7 +73,15 @@
 
     <select id="getMerchantList" resultMap="baseMap">
         select <include refid="all_column"/> from T_ACTIVITY_MERCHANT where DEL_FLAG = 0
-        and ACTIVITY_ID = #{activityId}
+        <if test="activityId != null and activityId != ''">
+            and ACTIVITY_ID = #{activityId}
+        </if>
+        <if test="activityList != null and activityList.size() > 0">
+            and ACTIVITY_ID in
+            <foreach collection="activityList" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
     </select>
 
     <update id="delete">

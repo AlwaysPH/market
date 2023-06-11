@@ -90,4 +90,24 @@ public class HttpStatus {
      * 系统警告消息
      */
     public static final int WARN = 601;
+
+    /**
+     * 潇湘支付返回消息
+     */
+    public static final String BACK_SUCCESS = "00000";
+
+    /**
+     * 潇湘支付返回消息key值
+     */
+    public static final String BACK_CODE = "RET_CODE";
+
+    /**
+     * 潇湘支付返回消息数据key值
+     */
+    public static final String BACK_LIST = "list";
+
+    /**
+     * 潇湘支付返回消息message的key值
+     */
+    public static final String BACK_MESSAGE = "RET_MESS";
 }

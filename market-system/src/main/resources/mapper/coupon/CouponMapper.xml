@@ -349,15 +349,15 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         COUPON_ID as couponId,
         ACTIVITY_ID as activityId
         from T_USER_COUPON where STATUS = '2'
-        <if test="couponIdList != null and couponIdList.size() > 0">
+        <if test="param.couponIdList != null and param.couponIdList.size() > 0">
             and COUPON_ID in
-            <foreach collection="couponIdList" item="item" open="(" close=")" separator=",">
+            <foreach collection="param.couponIdList" item="item" open="(" close=")" separator=",">
                 #{item}
             </foreach>
         </if>
-        <if test="activityIdList != null and activityIdList.size() > 0">
+        <if test="param.activityIdList != null and param.activityIdList.size() > 0">
             and ACTIVITY_ID in
-            <foreach collection="activityIdList" item="item" open="(" close=")" separator=",">
+            <foreach collection="param.activityIdList" item="item" open="(" close=")" separator=",">
                 #{item}
             </foreach>
         </if>
@@ -451,6 +451,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             tci.COUPON_NAME as couponName,
             tci.COUPON_TYPE as couponType,
             tai.ACTIVITY_NAME as activityName,
+            tai.USE_RULE as useRule,
             tuc.RECEIVE_TIME as receiveTime,
             tuc.STATUS as status,
             tuc.USE_TIME as useTime,
@@ -655,28 +656,28 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             NVL( sum( DIS_AMOUNT ), 0 ) AS disAmount,
             count( ORDER_NO ) AS orderNum,
             COUPON_ID as couponId
-            <if test="activityIdList != null and activityIdList.size() > 0">
+            <if test="param.activityIdList != null and param.activityIdList.size() > 0">
                 ,ACTIVITY_ID
             </if>
         FROM
             T_COUPON_USE_DETAIL
         <where>
-            <if test="couponIdList != null and couponIdList != ''">
+            <if test="param.couponIdList != null and param.couponIdList.size() > 0">
                 and COUPON_ID in
-                <foreach collection="couponIdList" item="item" open="(" close=")" separator=",">
+                <foreach collection="param.couponIdList" item="item" open="(" close=")" separator=",">
                     #{item}
                 </foreach>
             </if>
-            <if test="activityIdList != null and activityIdList.size() > 0">
+            <if test="param.activityIdList != null and param.activityIdList.size() > 0">
                 and ACTIVITY_ID in
-                <foreach collection="activityIdList" item="item" open="(" close=")" separator=",">
+                <foreach collection="param.activityIdList" item="item" open="(" close=")" separator=",">
                     #{item}
                 </foreach>
             </if>
         </where>
         GROUP BY
             COUPON_ID
-        <if test="activityIdList != null and activityIdList.size() > 0">
+        <if test="param.activityIdList != null and param.activityIdList.size() > 0">
             ,ACTIVITY_ID
         </if>
     </select>
@@ -685,22 +686,50 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
        SELECT PHONE_NUMBER, COUPON_ID, ACTIVITY_ID FROM
         T_COUPON_USE_DETAIL
         where USER_TYPE = '1'
-        <if test="beginTime != null and beginTime != '' and endTime != null and endTime != ''">
+        <if test="param.beginTime != null and param.beginTime != '' and param.endTime != null and param.endTime != ''">
             and TO_CHAR( TRANS_TIME, 'yyyy-mm-dd hh24:mi:ss' )
-            BETWEEN #{beginTime} AND #{endTime}
+            BETWEEN #{param.beginTime} AND #{param.endTime}
         </if>
-        <if test="couponIdList != null and couponIdList != ''">
+        <if test="param.couponIdList != null and param.couponIdList.size() > 0">
             and COUPON_ID in
-            <foreach collection="couponIdList" item="item" open="(" close=")" separator=",">
+            <foreach collection="param.couponIdList" item="item" open="(" close=")" separator=",">
                 #{item}
             </foreach>
         </if>
-        <if test="activityIdList != null and activityIdList.size() > 0">
+        <if test="param.activityIdList != null and param.activityIdList.size() > 0">
             and ACTIVITY_ID in
-            <foreach collection="activityIdList" item="item" open="(" close=")" separator=",">
+            <foreach collection="param.activityIdList" item="item" open="(" close=")" separator=",">
                 #{item}
             </foreach>
         </if>
         GROUP BY PHONE_NUMBER, COUPON_ID, ACTIVITY_ID
     </select>
+
+    <insert id="batchCouponUser" parameterType="java.util.List" useGeneratedKeys="false">
+        insert into T_USER_COUPON(ID, USER_NO, COUPON_ID, STATUS, PHONENUMBER, APP_ACCOUNT,
+        CARD_NUMBER, RECEIVE_TIME, DEVICE_NO, IP_ADDRESS, MAC_ADDRESS, ACTIVITY_ID, WRITE_OFF_CODE,
+        LINK_URL, SEND_TYPE, USE_TIME, UPDATE_TIME, CHANNEL_TYPE)
+        <foreach item="item" index="index" collection="list" separator=" union all ">
+            select
+            #{item.id,jdbcType=VARCHAR},
+            #{item.userNo,jdbcType=VARCHAR},
+            #{item.couponId,jdbcType=VARCHAR},
+            #{item.status,jdbcType=CHAR},
+            #{item.phoneNumber,jdbcType=VARCHAR},
+            #{item.appAccount,jdbcType=VARCHAR},
+            #{item.cardNumber,jdbcType=VARCHAR},
+            #{item.receiveTime,jdbcType=DATE},
+            #{item.deviceNo,jdbcType=VARCHAR},
+            #{item.ipAddress,jdbcType=VARCHAR},
+            #{item.macAddress,jdbcType=VARCHAR},
+            #{item.activityId,jdbcType=VARCHAR},
+            #{item.writeOffCode,jdbcType=VARCHAR},
+            #{item.linkUrl,jdbcType=VARCHAR},
+            #{item.sendType,jdbcType=CHAR},
+            #{item.useTime,jdbcType=DATE},
+            #{item.updateTime,jdbcType=DATE},
+            #{item.channelType,jdbcType=CHAR}
+            from dual
+        </foreach>
+    </insert>
 </mapper>

@@ -28,14 +28,16 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="alarmPhone"    column="ALARM_PHONE"    />
         <result property="alarmEmail"    column="ALARM_EMAIL"    />
         <result property="receiveType"    column="RECEIVE_TYPE"    />
-
+        <result property="grantStartTime"    column="GRANT_START_TIME"    />
+        <result property="grantEndTime"    column="GRANT_END_TIME"    />
     </resultMap>
 
     <sql id="all_column">
         ID, ACTIVITY_ID, COUPON_ID, INVENTORY_NUM, GRANT_NUM, TAKE_DATE_NUM,
         EFFECT_DATE_NUM, SAME_ACTIVITY_FLAG, DIFF_ACTIVITY_FLAG, OUT_ACTIVITY_FLAG,
         CREATE_BY, CREATE_TIME, UPDATE_BY, UPDATE_TIME, DEL_FLAG, EFFECT_START_TIME,
-        EFFECT_END_TIME, EFFECT_TYPE, ALARM_NUM, ALARM_CONTENT, ALARM_PHONE, ALARM_EMAIL, RECEIVE_TYPE
+        EFFECT_END_TIME, EFFECT_TYPE, ALARM_NUM, ALARM_CONTENT, ALARM_PHONE, ALARM_EMAIL,
+        RECEIVE_TYPE, GRANT_START_TIME, GRANT_END_TIME
     </sql>
 
     <select id="getDataList" resultMap="baseMap">
@@ -55,7 +57,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         insert into T_ACTIVITY_COUPON(ID, ACTIVITY_ID, COUPON_ID, INVENTORY_NUM, GRANT_NUM, TAKE_DATE_NUM,
         EFFECT_DATE_NUM, SAME_ACTIVITY_FLAG, DIFF_ACTIVITY_FLAG, OUT_ACTIVITY_FLAG,
         CREATE_BY, CREATE_TIME, UPDATE_BY, UPDATE_TIME, DEL_FLAG, EFFECT_START_TIME,
-        EFFECT_END_TIME, EFFECT_TYPE, ALARM_NUM, ALARM_CONTENT, ALARM_PHONE, ALARM_EMAIL, RECEIVE_TYPE)
+        EFFECT_END_TIME, EFFECT_TYPE, ALARM_NUM, ALARM_CONTENT, ALARM_PHONE, ALARM_EMAIL,
+        RECEIVE_TYPE, GRANT_START_TIME, GRANT_END_TIME)
         <foreach item="item" index="index" collection="list" separator=" union all ">
             select
             #{item.id,jdbcType=VARCHAR},
@@ -80,7 +83,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{item.alarmContent,jdbcType=CLOB},
             #{item.alarmPhone,jdbcType=CLOB},
             #{item.alarmEmail,jdbcType=CLOB},
-            #{item.receiveType,jdbcType=CHAR}
+            #{item.receiveType,jdbcType=CHAR},
+            #{item.grantStartTime,jdbcType=DATE},
+            #{item.grantEndTime,jdbcType=DATE}
             from dual
         </foreach>
     </insert>
@@ -172,7 +177,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         tac.ALARM_NUM,
         tac.ALARM_CONTENT,
         tac.ALARM_PHONE,
-        tac.ALARM_EMAIL
+        tac.ALARM_EMAIL,
+        tac.GRANT_START_TIME,
+        tac.GRANT_END_TIME
         FROM
         T_ACTIVITY_COUPON tac
         LEFT JOIN T_COUPON_INFO tci ON tac.COUPON_ID = tci.ID
@@ -192,4 +199,48 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </foreach>
     </update>
 
+    <update id="batchUpdate">
+        <foreach collection="list" item="item" index="index" open="BEGIN" close=";END;" separator=";">
+            update T_ACTIVITY_COUPON
+            <set>
+                <if test="item.inventoryNum != null">INVENTORY_NUM = #{item.inventoryNum},</if>
+                <if test="item.grantNum != null">GRANT_NUM = #{item.grantNum},</if>
+                <if test="item.takeDateNum != null">TAKE_DATE_NUM = #{item.takeDateNum},</if>
+                <if test="item.effectDateNum != null">EFFECT_DATE_NUM = #{item.effectDateNum},</if>
+                <if test="item.sameActivityFlag != null and item.sameActivityFlag != ''">SAME_ACTIVITY_FLAG = #{item.sameActivityFlag},</if>
+                <if test="item.diffActivityFlag != null and item.diffActivityFlag != ''">DIFF_ACTIVITY_FLAG = #{item.diffActivityFlag},</if>
+                <if test="item.outActivityFlag != null and item.outActivityFlag != ''">OUT_ACTIVITY_FLAG = #{item.outActivityFlag},</if>
+                <if test="item.effectStartTime != null">EFFECT_START_TIME = #{item.effectStartTime},</if>
+                <if test="item.effectEndTime != null">EFFECT_END_TIME = #{item.effectEndTime},</if>
+                <if test="item.effectType != null and item.effectType != ''">EFFECT_TYPE = #{item.effectType},</if>
+                <if test="item.alarmNum != null">ALARM_NUM = #{item.alarmNum},</if>
+                <if test="item.alarmContent != null and item.alarmContent != ''">ALARM_CONTENT = #{item.alarmContent},</if>
+                <if test="item.alarmPhone != null and item.alarmPhone != ''">ALARM_PHONE = #{item.alarmPhone},</if>
+                <if test="item.alarmEmail != null and item.alarmEmail != ''">ALARM_EMAIL = #{item.alarmEmail},</if>
+                <if test="item.receiveType != null and item.receiveType != ''">RECEIVE_TYPE = #{item.receiveType},</if>
+                <if test="item.grantStartTime != null">GRANT_START_TIME = #{item.grantStartTime},</if>
+                <if test="item.grantEndTime != null">GRANT_END_TIME = #{item.grantEndTime},</if>
+                <if test="item.updateBy != null and item.updateBy != ''">UPDATE_BY = #{item.updateBy},</if>
+                <if test="item.updateTime != null">UPDATE_TIME = #{item.updateTime},</if>
+            </set>
+            where DEL_FLAG = 0
+                <if test="item.id != null and item.id != ''">
+                    and ID = #{item.id}
+                </if>
+                <if test="item.activityId != null and item.activityId != ''">
+                    and ACTIVITY_ID = #{item.activityId}
+                </if>
+                <if test="item.couponId != null and item.couponId != ''">
+                    and COUPON_ID = #{item.couponId}
+                </if>
+        </foreach>
+    </update>
+
+    <update id="batchDelete">
+        update T_ACTIVITY_COUPON set DEL_FLAG = '1', UPDATE_BY = #{userId}, UPDATE_TIME = SYSDATE
+        where ID in
+        <foreach collection="list" item="item" open="(" close=")" separator=",">
+            #{item.id}
+        </foreach>
+    </update>
 </mapper>
